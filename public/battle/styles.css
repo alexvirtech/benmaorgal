@@ -1,0 +1,391 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: #1a1a2e;
+  color: #f0f0f0;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+#game-wrapper {
+  position: relative;
+  width: 100%;
+  max-height: 100vh;
+  max-height: 100dvh;
+  aspect-ratio: 960 / 640;
+}
+
+#game-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+  cursor: crosshair;
+  touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* === Score HUD === */
+#score-hud {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.6);
+  padding: 8px 24px;
+  border-radius: 20px;
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: #ffd700;
+  pointer-events: none;
+  z-index: 10;
+}
+
+#score-hud.hidden {
+  display: none;
+}
+
+/* === Sound Button === */
+#sound-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: linear-gradient(135deg, #ffd700, #ff6b35);
+  border: none;
+  border-radius: 10px;
+  color: #1a1a2e;
+  padding: 8px 16px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  cursor: pointer;
+  z-index: 10;
+  outline: none;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+#sound-btn:hover {
+  transform: scale(1.04);
+  box-shadow: 0 4px 16px rgba(255, 215, 0, 0.35);
+}
+
+#sound-btn:active {
+  transform: scale(0.96);
+}
+
+/* === Account Button (game page) === */
+#acct-link {
+  position: absolute;
+  top: 10px;
+  right: 110px;
+  background: linear-gradient(135deg, #ffd700, #ff6b35);
+  border: none;
+  border-radius: 10px;
+  color: #1a1a2e;
+  padding: 8px 16px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  cursor: pointer;
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  outline: none;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+#acct-link:hover {
+  transform: scale(1.04);
+  box-shadow: 0 4px 16px rgba(255, 215, 0, 0.35);
+}
+
+#acct-link:active {
+  transform: scale(0.96);
+}
+
+/* === Home Link === */
+#home-link {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  color: #aaa;
+  text-decoration: none;
+  font-size: 0.85rem;
+  z-index: 10;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 6px 12px;
+  border-radius: 8px;
+}
+
+#home-link:hover {
+  color: #ffd700;
+}
+
+/* === Overlays === */
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 10, 30, 0.92);
+  z-index: 20;
+  border-radius: 8px;
+}
+
+.overlay.hidden {
+  display: none;
+}
+
+.overlay h1 {
+  font-size: 3.5rem;
+  font-weight: 900;
+  margin-bottom: 12px;
+  background: linear-gradient(90deg, #ffd700, #ff6b35, #ff3860);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.overlay .subtitle {
+  font-size: 1.3rem;
+  color: #ccc;
+  margin-bottom: 28px;
+}
+
+.play-btn {
+  padding: 16px 48px;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #ffd700, #ff6b35);
+  color: #1a1a2e;
+  font-size: 1.5rem;
+  font-weight: 800;
+  cursor: pointer;
+  letter-spacing: 2px;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.play-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 24px rgba(255, 215, 0, 0.4);
+}
+
+.play-btn:active {
+  transform: scale(0.96);
+}
+
+.controls-info {
+  margin-top: 32px;
+  text-align: center;
+  color: #888;
+  font-size: 0.9rem;
+  line-height: 1.8;
+}
+
+.controls-info strong {
+  color: #ccc;
+}
+
+/* === Debug Panel === */
+#debug-panel {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-family: monospace;
+  color: #88ff88;
+  z-index: 10;
+  line-height: 1.6;
+}
+
+#debug-panel.hidden {
+  display: none;
+}
+
+/* === In-game Buttons === */
+#ingame-btns {
+  position: absolute;
+  top: 10px;
+  right: 220px;
+  display: flex;
+  gap: 6px;
+  z-index: 10;
+}
+
+#ingame-btns.hidden {
+  display: none;
+}
+
+.ingame-btn {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 12px;
+  background: rgba(0,0,0,0.55);
+  color: #ddd;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+  transition: transform 0.15s, background 0.15s;
+}
+
+.ingame-btn:hover {
+  background: rgba(0,0,0,0.75);
+  transform: scale(1.08);
+}
+
+.ingame-btn:active {
+  transform: scale(0.92);
+}
+
+/* === Start Buttons === */
+.start-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+
+.mp-btn {
+  background: linear-gradient(135deg, #44ddff, #4488ff);
+  font-size: 1.2rem;
+  padding: 14px 40px;
+}
+
+.mp-btn:hover {
+  box-shadow: 0 6px 24px rgba(68, 136, 255, 0.4);
+}
+
+/* === End Screen === */
+#end-title {
+  font-size: 3rem;
+  font-weight: 900;
+  margin-bottom: 24px;
+}
+
+/* === Mobile === */
+@media (max-width: 640px) {
+  body {
+    padding: 0;
+    justify-content: flex-start;
+  }
+
+  #game-wrapper {
+    border-radius: 0;
+  }
+
+  #game-canvas {
+    border-radius: 0;
+  }
+
+  .overlay {
+    border-radius: 0;
+    padding: 16px;
+  }
+
+  .overlay h1 {
+    font-size: 2.2rem;
+  }
+
+  .overlay .subtitle {
+    font-size: 1rem;
+    margin-bottom: 20px;
+  }
+
+  .play-btn {
+    padding: 14px 40px;
+    font-size: 1.3rem;
+  }
+
+  #score-hud {
+    font-size: 0.85rem;
+    padding: 6px 16px;
+    top: 6px;
+  }
+
+  #sound-btn {
+    padding: 8px 14px;
+    font-size: 0.75rem;
+    top: 6px;
+    right: 6px;
+  }
+
+  #acct-link {
+    padding: 8px 14px;
+    font-size: 0.75rem;
+    top: 6px;
+    right: 90px;
+  }
+
+  #home-link {
+    padding: 8px 14px;
+    font-size: 0.75rem;
+    top: 6px;
+    left: 6px;
+  }
+
+  #ingame-btns {
+    right: 170px;
+    top: 6px;
+  }
+
+  .ingame-btn {
+    width: 34px;
+    height: 34px;
+    font-size: 0.9rem;
+  }
+
+  #end-title {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 640px) and (orientation: portrait) {
+  #game-wrapper {
+    width: 100%;
+    aspect-ratio: auto;
+    height: auto;
+  }
+
+  #game-canvas {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 960 / 640;
+  }
+}
+
+@media (max-width: 640px) and (orientation: landscape) {
+  #game-wrapper {
+    width: auto;
+    height: 100vh;
+    height: 100dvh;
+    aspect-ratio: 960 / 640;
+  }
+}

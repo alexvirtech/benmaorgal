@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>BEN BATTLE</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="game-wrapper">
+    <a href="/" id="home-link">← Home</a>
+    <button id="sound-btn">&#x1F50A; SOUND</button>
+    <button id="acct-link" onclick="openAccountModal()">&#x1F464; ACCOUNT</button>
+
+    <canvas id="game-canvas" draggable="false"></canvas>
+
+    <div id="score-hud" class="hidden">YOU 0 : 0 ENEMIES</div>
+
+    <div id="ingame-btns" class="hidden">
+      <button id="ingame-char-btn" class="ingame-btn" onclick="Customizer.open()"><span class="btn-icon">&#x1F3AD;</span></button>
+      <button id="ingame-pause-btn" class="ingame-btn" onclick="Game.togglePause()"><span class="btn-icon">&#x23F8;</span></button>
+    </div>
+
+    <div id="pause-overlay" class="overlay hidden">
+      <h1>PAUSED</h1>
+      <div class="start-buttons">
+        <button class="play-btn" onclick="Game.togglePause()">RESUME</button>
+        <button class="play-btn" style="background:linear-gradient(135deg,#44ddff,#4488ff);font-size:1rem" onclick="Customizer.open()">&#x1F3AD; CHARACTER</button>
+      </div>
+    </div>
+
+    <!-- Start Screen -->
+    <div id="start-screen" class="overlay">
+      <h1>BEN BATTLE</h1>
+      <div class="subtitle">Ready to battle?</div>
+      <div class="start-buttons">
+        <button id="play-btn" class="play-btn">PLAY SOLO</button>
+        <button id="mp-btn" class="play-btn mp-btn" onclick="window.location.href='/battle/'">PLAY WITH FRIENDS</button>
+        <button id="char-btn" class="play-btn" style="background:linear-gradient(135deg,#44ddff,#4488ff);font-size:.85rem" onclick="Customizer.open()">&#x1F3AD; CHARACTER</button>
+      </div>
+      <div class="controls-info" id="controls-desktop">
+        <strong>MOVE:</strong> WASD / Arrows<br>
+        <strong>AIM:</strong> Mouse<br>
+        <strong>SHOOT:</strong> Click / Space<br>
+        <strong>DEBUG:</strong> F3
+      </div>
+      <div class="controls-info" id="controls-touch" style="display:none">
+        <strong>MOVE:</strong> Drag left side<br>
+        <strong>SHOOT:</strong> Tap right side
+      </div>
+      <script>
+        if ('ontouchstart' in window) {
+          document.getElementById('controls-desktop').style.display = 'none'
+          document.getElementById('controls-touch').style.display = 'block'
+        }
+      </script>
+    </div>
+
+    <!-- End Screen -->
+    <div id="end-screen" class="overlay hidden">
+      <div id="end-title"></div>
+      <button id="replay-btn" class="play-btn">PLAY AGAIN</button>
+    </div>
+
+    <!-- Debug Panel -->
+    <div id="debug-panel" class="hidden"></div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/world-themes.js"></script>
+  <script src="js/input.js"></script>
+  <script src="js/arena.js"></script>
+  <script src="js/bullet.js"></script>
+  <script src="js/hazard-balls.js"></script>
+  <script src="js/weapons.js"></script>
+  <script src="js/appearance-catalog.js"></script>
+  <script src="js/animation.js"></script>
+  <script src="js/advanced-renderer.js"></script>
+  <script src="js/brawl-renderer.js"></script>
+  <script src="js/player.js"></script>
+  <script src="js/enemy.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/customizer.js"></script>
+  <script src="js/game.js"></script>
+  <script src="/js/account.js"></script>
+</body>
+</html>

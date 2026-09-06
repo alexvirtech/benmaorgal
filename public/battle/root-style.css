@@ -1,0 +1,238 @@
+/* === Base Reset & Page Setup === */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  color: #f0f0f0;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 24px 16px;
+}
+
+.container {
+  max-width: 440px;
+  width: 100%;
+}
+
+/* === Title === */
+h1 {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 24px;
+  background: linear-gradient(90deg, #ffd700, #ff6b35, #ff3860);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+}
+
+/* === Search Box === */
+.search-box {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.search-box label {
+  font-size: 0.95rem;
+  color: #ccc;
+}
+
+.search-box input {
+  padding: 12px 16px;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  font-size: 1.1rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.search-box input:focus {
+  border-color: #ffd700;
+}
+
+.search-box button {
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #ffd700, #ff6b35);
+  color: #1a1a2e;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.search-box button:hover {
+  transform: scale(1.03);
+  box-shadow: 0 4px 20px rgba(255, 215, 0, 0.35);
+}
+
+.search-box button:active {
+  transform: scale(0.97);
+}
+
+/* === Loading Spinner === */
+.loading {
+  text-align: center;
+  margin-top: 32px;
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 5px solid rgba(255, 255, 255, 0.15);
+  border-top-color: #ffd700;
+  border-radius: 50%;
+  margin: 0 auto 12px;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* === Error === */
+.error {
+  margin-top: 24px;
+  padding: 16px;
+  background: rgba(255, 56, 96, 0.15);
+  border: 1px solid #ff3860;
+  border-radius: 12px;
+  text-align: center;
+  color: #ff6b8a;
+  font-weight: 600;
+}
+
+/* === Player Card === */
+.player-card {
+  margin-top: 28px;
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 20px;
+  padding: 24px;
+  border: 2px solid rgba(255, 215, 0, 0.25);
+}
+
+.card-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.card-header .player-name {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #ffd700;
+}
+
+.card-header .player-tag {
+  font-size: 0.85rem;
+  color: #888;
+  margin-top: 4px;
+}
+
+/* === Stats Grid === */
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.stat-box {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 14px;
+  text-align: center;
+}
+
+.stat-box .stat-value {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.stat-box .stat-label {
+  font-size: 0.75rem;
+  color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 4px;
+}
+
+.stat-box.trophies .stat-value {
+  color: #ffd700;
+}
+
+.stat-box.highest .stat-value {
+  color: #ff6b35;
+}
+
+.stat-box.level .stat-value {
+  color: #48dbfb;
+}
+
+.stat-box.club .stat-value {
+  color: #a29bfe;
+  font-size: 1rem;
+  word-break: break-word;
+}
+
+/* === Brawlers Section === */
+.brawlers-section h3 {
+  font-size: 1rem;
+  color: #ccc;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.brawler-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.brawler-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 12px 16px;
+}
+
+.brawler-rank {
+  font-size: 1.3rem;
+  min-width: 32px;
+}
+
+.brawler-name {
+  flex: 1;
+  font-weight: 700;
+  font-size: 1rem;
+  margin-left: 8px;
+}
+
+.brawler-trophies {
+  font-weight: 700;
+  color: #ffd700;
+}
+
+/* === Utility === */
+.hidden {
+  display: none !important;
+}
