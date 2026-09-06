@@ -1,0 +1,433 @@
+/* common.css — Shared styles for all Ben's Brawl Apps */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  color: #f0f0f0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  justify-content: center;
+  padding: 24px 16px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.container {
+  max-width: 480px;
+  width: 100%;
+}
+
+/* === Site Header === */
+.site-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.site-header .site-title {
+  font-size: 0.85rem;
+  color: #ffd700;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.site-header .home-link {
+  font-size: 0.85rem;
+  color: #aaa;
+  text-decoration: none;
+}
+
+.site-header .home-link:hover {
+  color: #ffd700;
+}
+
+/* === Page Title === */
+.app-number {
+  text-align: center;
+  font-size: 0.8rem;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+
+h1 {
+  text-align: center;
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+  background: linear-gradient(90deg, #ffd700, #ff6b35, #ff3860);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* === Tag Input === */
+.tag-box {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.tag-box input {
+  flex: 1;
+  padding: 12px 14px;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  font-size: 1rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  outline: none;
+}
+
+.tag-box input:focus {
+  border-color: #ffd700;
+}
+
+.tag-box button {
+  padding: 12px 20px;
+  min-height: 48px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #ffd700, #ff6b35);
+  color: #1a1a2e;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.tag-box button:hover {
+  transform: scale(1.03);
+  box-shadow: 0 4px 20px rgba(255, 215, 0, 0.35);
+}
+
+.tag-box button:active {
+  transform: scale(0.97);
+}
+
+/* === Loading === */
+.loading {
+  text-align: center;
+  margin-top: 32px;
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 5px solid rgba(255, 255, 255, 0.15);
+  border-top-color: #ffd700;
+  border-radius: 50%;
+  margin: 0 auto 12px;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* === Error === */
+.error {
+  margin-top: 20px;
+  padding: 16px;
+  background: rgba(255, 56, 96, 0.15);
+  border: 1px solid #ff3860;
+  border-radius: 12px;
+  text-align: center;
+  color: #ff6b8a;
+  font-weight: 600;
+}
+
+/* === Cards === */
+.card {
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.card-gold {
+  border: 2px solid rgba(255, 215, 0, 0.3);
+  background: rgba(255, 215, 0, 0.05);
+}
+
+.card h2, .card h3 {
+  background: none;
+  -webkit-text-fill-color: #ffd700;
+  font-size: 1.3rem;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+/* === Big Action Button === */
+.big-button {
+  display: block;
+  width: 100%;
+  padding: 18px;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #ffd700, #ff6b35);
+  color: #1a1a2e;
+  font-size: 1.2rem;
+  font-weight: 800;
+  cursor: pointer;
+  margin: 20px 0;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.big-button:hover {
+  transform: scale(1.03);
+  box-shadow: 0 6px 24px rgba(255, 215, 0, 0.4);
+}
+
+.big-button:active {
+  transform: scale(0.97);
+}
+
+/* === Stats === */
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.stat-row:last-child {
+  border-bottom: none;
+}
+
+.stat-label {
+  color: #aaa;
+}
+
+.stat-value {
+  font-weight: 700;
+  color: #fff;
+}
+
+/* === Progress Bar === */
+.progress-bar {
+  width: 100%;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  overflow: hidden;
+  margin: 12px 0;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ffd700, #ff6b35);
+  border-radius: 14px;
+  transition: width 0.5s ease;
+}
+
+/* === Brawler Row === */
+.brawler-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+}
+
+.brawler-rank {
+  font-size: 1.3rem;
+  min-width: 32px;
+}
+
+.brawler-name {
+  flex: 1;
+  font-weight: 700;
+  margin-left: 8px;
+}
+
+.brawler-trophies {
+  font-weight: 700;
+  color: #ffd700;
+}
+
+/* === Grid (for gallery) === */
+.brawler-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.grid-card {
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+}
+
+.grid-card .name {
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-bottom: 6px;
+}
+
+.grid-card .trophies {
+  color: #ffd700;
+  font-weight: 700;
+}
+
+.grid-card .power {
+  color: #aaa;
+  font-size: 0.8rem;
+  margin-top: 4px;
+}
+
+/* === VS layout === */
+.vs-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin: 20px 0;
+  flex-wrap: wrap;
+}
+
+.vs-player {
+  text-align: center;
+  flex: 1;
+  min-width: 120px;
+}
+
+.vs-player .name {
+  font-size: 1.2rem;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.vs-player .trophies {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #ffd700;
+}
+
+.vs-text {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #ff6b35;
+}
+
+.winner-text {
+  text-align: center;
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #ffd700;
+  margin-top: 16px;
+}
+
+/* === Dropdown === */
+select {
+  width: 100%;
+  padding: 12px 14px;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  font-size: 1rem;
+  outline: none;
+  margin-bottom: 12px;
+  appearance: none;
+}
+
+select:focus {
+  border-color: #ffd700;
+}
+
+select option {
+  background: #1a1a2e;
+  color: #fff;
+}
+
+/* === Search Input === */
+.search-input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  font-size: 1rem;
+  outline: none;
+  margin-bottom: 12px;
+}
+
+.search-input:focus {
+  border-color: #ffd700;
+}
+
+/* === Sort Buttons === */
+.sort-buttons {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.sort-btn {
+  padding: 8px 16px;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  background: transparent;
+  color: #ccc;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.sort-btn:hover, .sort-btn.active {
+  border-color: #ffd700;
+  color: #ffd700;
+}
+
+/* === Countdown === */
+.countdown {
+  text-align: center;
+  font-size: 4rem;
+  font-weight: 800;
+  color: #ffd700;
+  margin: 40px 0;
+}
+
+/* === Utility === */
+.hidden {
+  display: none !important;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-gold {
+  color: #ffd700;
+}
+
+.text-big {
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+.mb-8 { margin-bottom: 8px; }
+.mb-12 { margin-bottom: 12px; }
+.mb-16 { margin-bottom: 16px; }
+.mb-20 { margin-bottom: 20px; }
+.mt-12 { margin-top: 12px; }
+.mt-20 { margin-top: 20px; }

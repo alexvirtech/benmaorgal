@@ -79,7 +79,7 @@ async function apiFetch(path, options = {}) {
 
 function checkCodeInUrl() {
   const path = window.location.pathname
-  const match = path.match(/\/game\/(\d{6})$/)
+  const match = path.match(/\/battle\/(\d{6})$/)
   if (match) return match[1]
   const params = new URLSearchParams(window.location.search)
   return params.get('code')
@@ -220,7 +220,7 @@ async function joinByCode(code) {
 function setupLobby() {
   document.getElementById('lobby-code').textContent = mp.gameCode
   document.getElementById('copy-link-btn').onclick = () => {
-    const url = window.location.origin + '/battle/' + mp.gameCode
+    const url = window.location.origin + '/battle/lobby.html?code=' + mp.gameCode
     navigator.clipboard.writeText(url).then(() => {
       document.getElementById('copy-link-btn').textContent = 'Copied!'
       setTimeout(() => {
@@ -241,7 +241,7 @@ function setupLobby() {
     if (mp.socket) mp.socket.disconnect()
     mp.gameCode = null
     mp.isHost = false
-    window.location.href = '/battle/'
+    window.location.href = '/battle/lobby.html'
   }
 }
 
@@ -408,7 +408,7 @@ function connectSocketInternal() {
   mp.socket.on('player-rejected', ({ playerId }) => {
     if (playerId === mp.playerId) {
       alert('Your join request was rejected.')
-      window.location.href = '/battle/'
+      window.location.href = '/battle/lobby.html'
     }
   })
 
@@ -571,7 +571,7 @@ function setupGameButtons() {
       } else {
         mp.socket.emit('leave-game', { code: mp.gameCode })
         cleanupGame()
-        window.location.href = '/battle/'
+        window.location.href = '/battle/lobby.html'
       }
     }
   }
