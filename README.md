@@ -23,7 +23,8 @@ Child prompt → Game Interpreter → GameDefinition → Game SDK → Template �
 | `/` | Game Robot landing page |
 | `/games` | My Games — saved games list |
 | `/games/[id]` | Game workspace (chat + live game) |
-| `/battle` | Existing Ben's Brawl Apps |
+| `/battle` | Existing Ben's Brawl Apps (solo mode) |
+| `/battle/lobby.html` | Ben's Brawl Apps multiplayer lobby |
 
 Legacy redirect: `/game` → `/battle`
 
