@@ -24,7 +24,7 @@ export const jumperTemplate = {
       template: 'jumper',
       title: 'Super Jumper',
       theme: { background: 'grass' },
-      player: { type: 'frog', size: 65, speed: 5 },
+      player: { type: 'frog', size: 85, speed: 5 },
       objects: [
         { id: 'obstacle', role: 'hazard', type: 'cactus', speed: 4, spawnRate: 1400 },
       ],
@@ -44,12 +44,15 @@ export const jumperTemplate = {
       speed: def.player.speed,
       vy: 0,
       grounded: true,
+      baseWidth: def.player.size,
+      baseHeight: def.player.size,
     })
     engine.state.lives = def.rules.startingLives
     engine.set('spawnTimer', 0)
     engine.set('scoreTimer', 0)
     engine.set('gameSpeed', 1)
     engine.set('targetScore', def.rules.targetScore)
+    engine.set('wasGrounded', true)
   },
 
   update(engine, dt) {
@@ -60,16 +63,38 @@ export const jumperTemplate = {
     if ((input.actions.jump || input.pointer.clicked) && player.grounded) {
       player.vy = -580
       player.grounded = false
-      engine.spawnParticles(player.x + player.width / 2, GROUND_Y, '#8B6914', 6, 2)
+      engine.spawnParticles(player.x + player.width / 2, GROUND_Y, '#8B6914', 10, 2)
     }
 
     player.vy += GRAVITY * dt
     player.y += player.vy * dt
 
+    const wasGrounded = engine.get('wasGrounded')
     if (player.y >= GROUND_Y - player.height) {
       player.y = GROUND_Y - player.height
       player.vy = 0
       player.grounded = true
+      if (!wasGrounded) {
+        engine.spawnParticles(player.x + player.width / 2, GROUND_Y, '#a08040', 8, 2)
+        player.width = player.baseWidth * 1.3
+        player.height = player.baseHeight * 0.7
+        player.y = GROUND_Y - player.height
+      }
+    }
+    engine.set('wasGrounded', player.grounded)
+
+    if (player.width !== player.baseWidth) {
+      player.width += (player.baseWidth - player.width) * 0.15
+      player.height += (player.baseHeight - player.height) * 0.15
+      if (Math.abs(player.width - player.baseWidth) < 1) {
+        player.width = player.baseWidth
+        player.height = player.baseHeight
+      }
+      player.y = GROUND_Y - player.height
+    }
+
+    if (!player.grounded) {
+      engine.spawnTrail(player.x + player.width / 2, player.y + player.height, '#aaddaa', 2)
     }
 
     const def = engine.definition
@@ -79,16 +104,19 @@ export const jumperTemplate = {
     const timer = (engine.get('spawnTimer') || 0) + dt * 1000
     if (timer >= obs.spawnRate) {
       engine.set('spawnTimer', 0)
-      const h = 45 + Math.random() * 20
+      const h = 55 + Math.random() * 25
       engine.addEntity({
         role: 'hazard',
         type: obs.type,
         sprite: getSprite(obs.type),
         x: GAME_WIDTH + 20,
         y: GROUND_Y - h,
-        width: 50,
+        width: 60,
         height: h,
         vx: -(obs.speed * gameSpeed),
+        bob: true,
+        bobAmount: 2,
+        bobPhase: Math.random() * 6,
       })
     } else {
       engine.set('spawnTimer', timer)
@@ -116,7 +144,8 @@ export const jumperTemplate = {
       if (checkAABB(e, player)) {
         toRemove.push(e.id)
         engine.loseLife()
-        engine.spawnParticles(player.x + player.width / 2, player.y + player.height / 2, '#ff4444', 12, 4)
+        engine.screenShake(8, 0.15)
+        engine.spawnParticles(player.x + player.width / 2, player.y + player.height / 2, '#ff4444', 16, 4)
         player.y = GROUND_Y - player.height
         player.vy = 0
         player.grounded = true
@@ -137,8 +166,9 @@ export const jumperTemplate = {
     ctx.fillStyle = '#7ec850'
     ctx.fillRect(0, GROUND_Y, GAME_WIDTH, 6)
 
+    const t = engine.state.elapsed
     for (const e of engine.entities.values()) {
-      if (e.active && e.visible) drawEntity(ctx, e)
+      if (e.active && e.visible) drawEntity(ctx, e, t)
     }
   },
 }

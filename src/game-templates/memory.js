@@ -38,8 +38,8 @@ export const memoryTemplate = {
 
     const cols = pairs <= 4 ? 4 : pairs <= 6 ? 4 : 5
     const rows = Math.ceil(deck.length / cols)
-    const cardW = Math.min(110, (GAME_WIDTH - 80) / cols)
-    const cardH = Math.min(120, (GAME_HEIGHT - 120) / rows)
+    const cardW = Math.min(125, (GAME_WIDTH - 80) / cols)
+    const cardH = Math.min(135, (GAME_HEIGHT - 120) / rows)
     const startX = (GAME_WIDTH - cols * (cardW + 12)) / 2
     const startY = 60
 
@@ -116,10 +116,10 @@ export const memoryTemplate = {
             cards[b].matchAnim = 1
             engine.addScore(1)
             engine.spawnParticles(
-              cards[a].x + cards[a].w / 2, cards[a].y + cards[a].h / 2, '#2ecc71', 8, 3
+              cards[a].x + cards[a].w / 2, cards[a].y + cards[a].h / 2, '#2ecc71', 14, 4
             )
             engine.spawnParticles(
-              cards[b].x + cards[b].w / 2, cards[b].y + cards[b].h / 2, '#2ecc71', 8, 3
+              cards[b].x + cards[b].w / 2, cards[b].y + cards[b].h / 2, '#2ecc71', 14, 4
             )
             engine.spawnFloatingText(
               (cards[a].x + cards[b].x) / 2 + cards[a].w / 2,
@@ -131,6 +131,7 @@ export const memoryTemplate = {
               engine.win()
             }
           } else {
+            engine.screenShake(4, 0.1)
             engine.set('lockTimer', 0.8)
           }
         }
@@ -143,23 +144,28 @@ export const memoryTemplate = {
     drawBackground(ctx, engine.definition?.theme?.background || 'sky')
 
     const cards = engine.get('cards') || []
+    const t = engine.state.elapsed
+
     for (const card of cards) {
-      const scale = 1 + card.matchAnim * 0.15
+      const scale = 1 + card.matchAnim * 0.25
 
       ctx.save()
       ctx.translate(card.x + card.w / 2, card.y + card.h / 2)
       ctx.scale(scale, scale)
 
       if (card.matched) {
+        ctx.globalAlpha = 0.3 + Math.sin(t * 3 + card.id) * 0.2
         ctx.fillStyle = 'rgba(46, 204, 113, 0.3)'
         ctx.beginPath()
         ctx.roundRect(-card.w / 2, -card.h / 2, card.w, card.h, 10)
         ctx.fill()
-        ctx.font = `${card.w * 0.5}px serif`
+        ctx.shadowColor = '#2ecc71'
+        ctx.shadowBlur = 8
+        ctx.font = `${card.w * 0.55}px serif`
         ctx.textAlign = 'center'
         ctx.textBaseline = 'middle'
-        ctx.globalAlpha = 0.5
         ctx.fillText(card.emoji, 0, 0)
+        ctx.shadowBlur = 0
         ctx.globalAlpha = 1
       } else if (card.revealed) {
         ctx.fillStyle = '#fff'
@@ -169,7 +175,8 @@ export const memoryTemplate = {
         ctx.strokeStyle = '#6c5ce7'
         ctx.lineWidth = 3
         ctx.stroke()
-        ctx.font = `${card.w * 0.5}px serif`
+        ctx.rotate(Math.sin(t * 8 + card.id) * 0.03)
+        ctx.font = `${card.w * 0.55}px serif`
         ctx.textAlign = 'center'
         ctx.textBaseline = 'middle'
         ctx.fillText(card.emoji, 0, 0)
@@ -182,7 +189,7 @@ export const memoryTemplate = {
         ctx.roundRect(-card.w / 2, -card.h / 2, card.w, card.h, 10)
         ctx.fill()
         ctx.fillStyle = 'rgba(255,255,255,0.3)'
-        ctx.font = `${card.w * 0.4}px serif`
+        ctx.font = `${card.w * 0.5}px serif`
         ctx.textAlign = 'center'
         ctx.textBaseline = 'middle'
         ctx.fillText('?', 0, 0)

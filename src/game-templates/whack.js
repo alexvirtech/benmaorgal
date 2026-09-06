@@ -4,9 +4,9 @@ import { getSprite } from '../game-data/schema.js'
 
 const COLS = 4
 const ROWS = 3
-const HOLE_W = 100
-const HOLE_H = 60
-const MOLE_SIZE = 65
+const HOLE_W = 120
+const HOLE_H = 68
+const MOLE_SIZE = 82
 
 export const whackTemplate = {
   id: 'whack',
@@ -35,13 +35,13 @@ export const whackTemplate = {
 
   setup(engine, def) {
     const holes = []
-    const startX = (GAME_WIDTH - COLS * (HOLE_W + 30) + 30) / 2
-    const startY = 100
+    const startX = (GAME_WIDTH - COLS * (HOLE_W + 20) + 20) / 2
+    const startY = 90
     for (let r = 0; r < ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
         holes.push({
-          x: startX + c * (HOLE_W + 30),
-          y: startY + r * (HOLE_H + 80),
+          x: startX + c * (HOLE_W + 20),
+          y: startY + r * (HOLE_H + 85),
           mole: null,
           timer: 0,
           cooldown: 0,
@@ -104,6 +104,7 @@ export const whackTemplate = {
           hole.cooldown = 0.3
           engine.set('combo', 0)
           engine.loseLife()
+          engine.screenShake(8, 0.15)
         }
       }
     }
@@ -135,7 +136,8 @@ export const whackTemplate = {
           engine.set('combo', combo)
           const points = 1 + Math.floor(combo / 4)
           engine.addScore(points)
-          engine.spawnParticles(hole.x + HOLE_W / 2, my + MOLE_SIZE / 2, '#ffd700', 10, 4)
+          engine.screenShake(5, 0.1)
+          engine.spawnParticles(hole.x + HOLE_W / 2, my + MOLE_SIZE / 2, '#ffd700', 16, 5)
           engine.spawnFloatingText(hole.x + HOLE_W / 2, my, `+${points}`)
           hole.mole = null
           hole.timer = 0
@@ -170,6 +172,7 @@ export const whackTemplate = {
 
     const holes = engine.get('holes') || []
     const moleDuration = engine.get('moleDuration') || 1.8
+    const elapsed = engine.state.elapsed
 
     for (const hole of holes) {
       ctx.fillStyle = 'rgba(0,0,0,0.25)'
@@ -184,7 +187,8 @@ export const whackTemplate = {
 
       if (hole.mole) {
         const pct = 1 - hole.timer / moleDuration
-        const popUp = Math.min(1, hole.timer * 5)
+        const raw = Math.min(1, hole.timer * 5)
+        const popUp = raw < 1 ? 1 - Math.pow(1 - raw, 3) + Math.sin(raw * Math.PI * 2) * 0.1 * (1 - raw) : 1
         const offsetY = (1 - popUp) * MOLE_SIZE * 0.6
 
         ctx.save()
@@ -195,13 +199,24 @@ export const whackTemplate = {
         const mx = hole.x + HOLE_W / 2
         const my = hole.y - MOLE_SIZE * 0.3 + offsetY
 
-        const wobble = Math.sin(hole.timer * 12) * 0.05
+        const wobble = Math.sin(hole.timer * 14) * 0.08
         ctx.translate(mx, my)
         ctx.rotate(wobble)
 
+        for (let s = 0; s < 3; s++) {
+          const sa = elapsed * 3 + s * 2.1 + hole.x * 0.01
+          const sr = MOLE_SIZE * 0.5
+          const sx = Math.cos(sa) * sr
+          const sy = Math.sin(sa) * sr * 0.5
+          ctx.fillStyle = `rgba(255,215,0,${0.4 + Math.sin(sa * 2) * 0.3})`
+          ctx.beginPath()
+          ctx.arc(sx, sy, 2, 0, Math.PI * 2)
+          ctx.fill()
+        }
+
         const objDef = engine.definition?.objects?.[0] || { type: 'monster' }
         const sprite = getSprite(objDef.type || 'monster')
-        ctx.font = `${MOLE_SIZE * 0.75}px serif`
+        ctx.font = `${MOLE_SIZE * 0.85}px serif`
         ctx.textAlign = 'center'
         ctx.textBaseline = 'middle'
         ctx.fillText(sprite, 0, 0)
@@ -225,7 +240,7 @@ export const whackTemplate = {
 
       if (hole.hitAnim > 0) {
         ctx.globalAlpha = hole.hitAnim
-        ctx.font = `${30 + hole.hitAnim * 15}px serif`
+        ctx.font = `${40 + hole.hitAnim * 20}px serif`
         ctx.textAlign = 'center'
         ctx.textBaseline = 'middle'
         ctx.fillText('💥', hole.x + HOLE_W / 2, hole.y - 20)

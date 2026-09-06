@@ -21,7 +21,7 @@ export const catchTemplate = {
       template: 'catch',
       title: 'Star Catcher',
       theme: { background: 'sky' },
-      player: { type: 'cat', size: 70, speed: 6 },
+      player: { type: 'cat', size: 90, speed: 6 },
       objects: [
         { id: 'star', role: 'collectible', type: 'star', speed: 3, spawnRate: 900, points: 1 },
       ],
@@ -45,6 +45,7 @@ export const catchTemplate = {
       engine.set(`timer_${obj.id}`, 0)
     }
     engine.set('targetScore', def.rules.targetScore)
+    engine.set('sparkleTimer', 0)
   },
 
   update(engine, dt) {
@@ -55,13 +56,18 @@ export const catchTemplate = {
     moveTowardsMouse(player, input, dt)
     clampToBounds(player, 40)
 
+    if (input.pointer.down || input.actions.left || input.actions.right) {
+      engine.spawnTrail(player.x + player.width / 2, player.y + player.height, '#ffaa44', 2)
+    }
+
     const def = engine.definition
     for (const obj of def.objects) {
       const timerKey = `timer_${obj.id}`
       const timer = (engine.get(timerKey) || 0) + dt * 1000
       if (timer >= obj.spawnRate) {
         engine.set(timerKey, 0)
-        const size = 48
+        const size = 65
+        const isHazard = obj.role === 'hazard'
         engine.addEntity({
           role: obj.role,
           type: obj.type,
@@ -72,10 +78,30 @@ export const catchTemplate = {
           height: size,
           vy: obj.speed + Math.random() * 0.5,
           points: obj.points || 1,
+          bob: true,
+          bobPhase: Math.random() * 6,
+          bobAmount: isHazard ? 3 : 5,
+          glow: !isHazard,
+          glowColor: '#ffd700',
+          glowSize: 10,
+          spin: isHazard,
+          spinSpeed: isHazard ? 3 : 0,
         })
       } else {
         engine.set(timerKey, timer)
       }
+    }
+
+    const sparkleTimer = (engine.get('sparkleTimer') || 0) + dt
+    if (sparkleTimer >= 0.3) {
+      engine.set('sparkleTimer', 0)
+      const collectibles = engine.getEntitiesByRole('collectible')
+      if (collectibles.length > 0) {
+        const c = collectibles[Math.floor(Math.random() * collectibles.length)]
+        engine.spawnParticles(c.x + c.width / 2, c.y + c.height / 2, '#ffd700', 2, 1)
+      }
+    } else {
+      engine.set('sparkleTimer', sparkleTimer)
     }
 
     const toRemove = []
@@ -86,7 +112,7 @@ export const catchTemplate = {
         toRemove.push(e.id)
         if (e.role === 'collectible') {
           engine.loseLife()
-          engine.spawnParticles(e.x + e.width / 2, GAME_HEIGHT, '#ff4444', 6, 2)
+          engine.spawnParticles(e.x + e.width / 2, GAME_HEIGHT, '#ff4444', 8, 2)
         }
         continue
       }
@@ -94,11 +120,12 @@ export const catchTemplate = {
         toRemove.push(e.id)
         if (e.role === 'collectible') {
           engine.addScore(e.points || 1)
-          engine.spawnParticles(e.x + e.width / 2, e.y + e.height / 2, '#ffd700', 10, 3)
+          engine.spawnParticles(e.x + e.width / 2, e.y + e.height / 2, '#ffd700', 14, 3)
           engine.spawnFloatingText(e.x + e.width / 2, e.y, `+${e.points || 1}`)
         } else if (e.role === 'hazard') {
           engine.loseLife()
-          engine.spawnParticles(player.x + player.width / 2, player.y, '#ff0000', 12, 4)
+          engine.screenShake(8, 0.15)
+          engine.spawnParticles(player.x + player.width / 2, player.y, '#ff0000', 16, 4)
         }
       }
     }
@@ -111,8 +138,9 @@ export const catchTemplate = {
 
   render(engine, ctx) {
     drawBackground(ctx, engine.definition?.theme?.background || 'sky')
+    const t = engine.state.elapsed
     for (const e of engine.entities.values()) {
-      if (e.active && e.visible) drawEntity(ctx, e)
+      if (e.active && e.visible) drawEntity(ctx, e, t)
     }
   },
 }

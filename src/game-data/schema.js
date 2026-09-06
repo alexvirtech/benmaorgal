@@ -32,7 +32,7 @@ export function createGameDefinition(overrides = {}) {
     },
     player: {
       type: 'cat',
-      size: 65,
+      size: 85,
       speed: 6,
       ...(overrides.player || {}),
     },

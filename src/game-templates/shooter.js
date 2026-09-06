@@ -21,7 +21,7 @@ export const shooterTemplate = {
       template: 'shooter',
       title: 'Space Shooter',
       theme: { background: 'space' },
-      player: { type: 'spaceship', size: 65, speed: 6 },
+      player: { type: 'spaceship', size: 85, speed: 6 },
       objects: [
         { id: 'alien', role: 'enemy', type: 'alien', speed: 2, spawnRate: 1100, points: 1 },
       ],
@@ -54,6 +54,10 @@ export const shooterTemplate = {
     moveTowardsMouse(player, input, dt)
     clampToBounds(player, 40)
 
+    if (input.pointer.down || input.actions.left || input.actions.right) {
+      engine.spawnTrail(player.x + player.width / 2, player.y + player.height, '#4488ff', 2)
+    }
+
     const fireTimer = (engine.get('fireTimer') || 0) + dt
     const shouldFire = input.actions.fire || input.pointer.down
     if (shouldFire && fireTimer > 0.22) {
@@ -62,13 +66,16 @@ export const shooterTemplate = {
         role: 'projectile',
         type: 'bullet',
         color: '#ffdd00',
-        x: player.x + player.width / 2 - 4,
-        y: player.y - 14,
-        width: 8,
-        height: 14,
+        x: player.x + player.width / 2 - 6,
+        y: player.y - 18,
+        width: 12,
+        height: 18,
         vy: -12,
+        glow: true,
+        glowColor: '#ffdd00',
+        glowSize: 10,
       })
-      engine.spawnParticles(player.x + player.width / 2, player.y, '#ffaa00', 3, 1)
+      engine.spawnParticles(player.x + player.width / 2, player.y, '#ffaa00', 5, 2)
     } else {
       engine.set('fireTimer', fireTimer)
     }
@@ -79,7 +86,7 @@ export const shooterTemplate = {
     const timer = (engine.get('spawnTimer') || 0) + dt * 1000
     if (timer >= enemyDef.spawnRate) {
       engine.set('spawnTimer', 0)
-      const size = 52
+      const size = 68
       engine.addEntity({
         role: 'enemy',
         type: enemyDef.type,
@@ -90,6 +97,13 @@ export const shooterTemplate = {
         height: size,
         vy: enemyDef.speed,
         points: enemyDef.points || 1,
+        bob: true,
+        bobSpeed: 2,
+        bobPhase: Math.random() * 6,
+        bobAmount: 4,
+        glow: true,
+        glowColor: '#ff6600',
+        glowSize: 8,
       })
     } else {
       engine.set('spawnTimer', timer)
@@ -109,7 +123,7 @@ export const shooterTemplate = {
           toRemove.add(p.id)
           toRemove.add(e.id)
           engine.addScore(e.points || 1)
-          engine.spawnParticles(e.x + e.width / 2, e.y + e.height / 2, '#ff6600', 12, 4)
+          engine.spawnParticles(e.x + e.width / 2, e.y + e.height / 2, '#ff6600', 18, 4)
           engine.spawnFloatingText(e.x + e.width / 2, e.y, `+${e.points || 1}`)
           break
         }
@@ -123,7 +137,8 @@ export const shooterTemplate = {
       if (checkAABB(e, player)) {
         toRemove.add(e.id)
         engine.loseLife()
-        engine.spawnParticles(player.x + player.width / 2, player.y, '#ff0000', 10, 3)
+        engine.screenShake(8, 0.15)
+        engine.spawnParticles(player.x + player.width / 2, player.y, '#ff0000', 14, 3)
       }
     }
 
@@ -133,7 +148,8 @@ export const shooterTemplate = {
       if (checkAABB(h, player)) {
         toRemove.add(h.id)
         engine.loseLife()
-        engine.spawnParticles(player.x + player.width / 2, player.y, '#ff0000', 10, 3)
+        engine.screenShake(8, 0.15)
+        engine.spawnParticles(player.x + player.width / 2, player.y, '#ff0000', 14, 3)
       }
     }
 
@@ -146,16 +162,19 @@ export const shooterTemplate = {
 
   render(engine, ctx) {
     drawBackground(ctx, engine.definition?.theme?.background || 'space')
+    const t = engine.state.elapsed
     for (const e of engine.entities.values()) {
       if (!e.active || !e.visible) continue
       if (e.role === 'projectile') {
         ctx.fillStyle = e.color || '#ffdd00'
         ctx.shadowColor = '#ffdd00'
-        ctx.shadowBlur = 8
-        ctx.fillRect(e.x, e.y, e.width, e.height)
+        ctx.shadowBlur = 12
+        ctx.beginPath()
+        ctx.roundRect(e.x, e.y, e.width, e.height, 3)
+        ctx.fill()
         ctx.shadowBlur = 0
       } else {
-        drawEntity(ctx, e)
+        drawEntity(ctx, e, t)
       }
     }
   },

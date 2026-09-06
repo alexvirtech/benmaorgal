@@ -168,7 +168,7 @@ export const racerTemplate = {
       template: 'racer',
       title: 'Road Racer',
       theme: { background: 'city' },
-      player: { type: 'car', size: 60, speed: 6 },
+      player: { type: 'car', size: 72, speed: 6 },
       objects: [
         { id: 'traffic', role: 'hazard', type: 'barrel', speed: 3, spawnRate: 900 },
       ],
@@ -177,7 +177,7 @@ export const racerTemplate = {
   },
 
   setup(engine, def) {
-    const size = def.player.size || 60
+    const size = def.player.size || 72
     engine.addEntity({
       role: 'player',
       type: 'f1car',
@@ -212,6 +212,9 @@ export const racerTemplate = {
     player.angle = player.angle * 0.85 + targetAngle * 0.15
     player.prevX = player.x
 
+    engine.spawnTrail(player.x + player.width * 0.25, player.y + player.height, '#ff4400', 3)
+    engine.spawnTrail(player.x + player.width * 0.75, player.y + player.height, '#ff4400', 3)
+
     const gameSpeed = engine.get('gameSpeed') || 1
     engine.set('roadOffset', (engine.get('roadOffset') + dt * 200 * gameSpeed) % 40)
 
@@ -222,8 +225,8 @@ export const racerTemplate = {
     if (timer >= obs.spawnRate) {
       engine.set('spawnTimer', 0)
       const lane = Math.floor(Math.random() * 3)
-      const w = 44
-      const h = 62
+      const w = 54
+      const h = 74
       engine.addEntity({
         role: 'hazard',
         type: 'traffic',
@@ -260,8 +263,9 @@ export const racerTemplate = {
       if (checkAABB(e, player)) {
         toRemove.push(e.id)
         engine.loseLife()
-        engine.spawnParticles(e.x + e.width / 2, e.y + e.height / 2, '#ff4400', 14, 4)
-        engine.spawnParticles(player.x + player.width / 2, player.y, '#ff0000', 8, 3)
+        engine.screenShake(10, 0.2)
+        engine.spawnParticles(e.x + e.width / 2, e.y + e.height / 2, '#ff4400', 20, 5)
+        engine.spawnParticles(player.x + player.width / 2, player.y, '#ff0000', 14, 4)
       }
     }
     toRemove.forEach(id => engine.removeEntity(id))
@@ -313,6 +317,21 @@ export const racerTemplate = {
       ctx.stroke()
     }
     ctx.setLineDash([])
+
+    const gameSpeed = engine.get('gameSpeed') || 1
+    if (gameSpeed > 1.3) {
+      ctx.strokeStyle = `rgba(255,255,255,${Math.min(0.3, (gameSpeed - 1.3) * 0.3)})`
+      ctx.lineWidth = 1.5
+      const speedOffset = (engine.state.elapsed * 600 * gameSpeed) % GAME_HEIGHT
+      for (let i = 0; i < 6; i++) {
+        const lx = ROAD_LEFT + 20 + i * ((ROAD_RIGHT - ROAD_LEFT - 40) / 5)
+        const ly = ((speedOffset + i * 110) % (GAME_HEIGHT + 60)) - 30
+        ctx.beginPath()
+        ctx.moveTo(lx, ly)
+        ctx.lineTo(lx, ly + 25 + gameSpeed * 8)
+        ctx.stroke()
+      }
+    }
 
     for (const e of engine.entities.values()) {
       if (!e.active || !e.visible) continue

@@ -25,6 +25,7 @@ export class GameEngine {
     this._lastTime = 0
     this._listeners = {}
     this._customState = {}
+    this._shake = { intensity: 0, timer: 0, duration: 0 }
   }
 
   setDefinition(definition) {
@@ -151,6 +152,24 @@ export class GameEngine {
     }
   }
 
+  screenShake(intensity = 6, duration = 0.15) {
+    this._shake.intensity = Math.max(this._shake.intensity, intensity)
+    this._shake.duration = duration
+    this._shake.timer = duration
+  }
+
+  spawnTrail(x, y, color, size = 3) {
+    this.particles.push({
+      x, y,
+      vx: (Math.random() - 0.5) * 0.5,
+      vy: (Math.random() - 0.5) * 0.5,
+      life: 0.25,
+      maxLife: 0.25,
+      size,
+      color,
+    })
+  }
+
   spawnFloatingText(x, y, text, color = '#ffd700') {
     this.floatingTexts.push({
       x, y, text, color,
@@ -167,6 +186,10 @@ export class GameEngine {
       p.vy += 3 * dt
       p.life -= dt
       if (p.life <= 0) this.particles.splice(i, 1)
+    }
+    if (this._shake.timer > 0) {
+      this._shake.timer = Math.max(0, this._shake.timer - dt)
+      if (this._shake.timer <= 0) this._shake.intensity = 0
     }
     for (let i = this.floatingTexts.length - 1; i >= 0; i--) {
       const ft = this.floatingTexts[i]
@@ -237,6 +260,7 @@ export class GameEngine {
     this.floatingTexts = []
     this._customState = {}
     this._listeners = {}
+    this._shake = { intensity: 0, timer: 0, duration: 0 }
     this.state = {
       status: 'ready',
       score: 0,
@@ -281,6 +305,12 @@ export class GameEngine {
     const scale = this.canvas.width / GAME_WIDTH
     ctx.save()
     ctx.scale(scale, scale)
+
+    if (this._shake.timer > 0) {
+      const progress = this._shake.timer / this._shake.duration
+      const s = this._shake.intensity * progress
+      ctx.translate((Math.random() - 0.5) * s * 2, (Math.random() - 0.5) * s * 2)
+    }
 
     if (this.template && this.template.render) {
       this.template.render(this, ctx)

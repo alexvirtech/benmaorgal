@@ -37,6 +37,7 @@ export const clickerTemplate = {
     engine.set('spawnDelay', 0.3)
     engine.set('spawnTimer', 0)
     engine.set('combo', 0)
+    engine.set('sparkleTimer', 0)
     spawnTarget(engine)
   },
 
@@ -69,10 +70,20 @@ export const clickerTemplate = {
     const targetTimer = (engine.get('targetTimer') || 0) + dt
     engine.set('targetTimer', targetTimer)
 
+    let sparkleTimer = (engine.get('sparkleTimer') || 0) + dt
+    if (sparkleTimer >= 0.4) {
+      sparkleTimer = 0
+      const sx = target.x + target.size / 2 + (Math.random() - 0.5) * target.size
+      const sy = target.y + target.size / 2 + (Math.random() - 0.5) * target.size
+      engine.spawnParticles(sx, sy, '#ffd700', 2, 1)
+    }
+    engine.set('sparkleTimer', sparkleTimer)
+
     if (targetTimer >= engine.get('targetDuration')) {
       engine.spawnParticles(
-        target.x + target.size / 2, target.y + target.size / 2, '#888888', 8, 3
+        target.x + target.size / 2, target.y + target.size / 2, '#888888', 12, 4
       )
+      engine.screenShake(8, 0.15)
       engine.set('currentTarget', null)
       engine.set('targetTimer', 0)
       engine.set('combo', 0)
@@ -90,11 +101,12 @@ export const clickerTemplate = {
         const points = 1 + Math.floor(combo / 5)
         engine.addScore(points)
         engine.spawnParticles(
-          target.x + target.size / 2, target.y + target.size / 2, '#ffd700', 12, 4
+          target.x + target.size / 2, target.y + target.size / 2, '#ffd700', 18, 5
         )
         engine.spawnFloatingText(
           target.x + target.size / 2, target.y, `+${points}`
         )
+        engine.screenShake(5, 0.1)
         engine.set('currentTarget', null)
         engine.set('targetTimer', 0)
 
@@ -128,18 +140,24 @@ export const clickerTemplate = {
       const pct = 1 - targetTimer / duration
 
       ctx.save()
-      const pulse = 0.85 + Math.sin(targetTimer * 8) * 0.08
+      const pulse = 0.85 + Math.sin(targetTimer * 10) * 0.12
       ctx.translate(target.x + target.size / 2, target.y + target.size / 2)
       ctx.scale(pulse, pulse)
 
+      ctx.strokeStyle = 'rgba(255,200,0,' + (0.3 + Math.sin(targetTimer * 6) * 0.2) + ')'
+      ctx.lineWidth = 3
+      ctx.beginPath()
+      ctx.arc(0, 0, target.size * 0.8, 0, Math.PI * 2)
+      ctx.stroke()
+
       ctx.fillStyle = `rgba(255,100,100,${0.2 + pct * 0.3})`
       ctx.beginPath()
-      ctx.arc(0, 0, target.size * 0.7, 0, Math.PI * 2)
+      ctx.arc(0, 0, target.size * 0.75, 0, Math.PI * 2)
       ctx.fill()
 
       const objDef = engine.definition?.objects?.[0]
       const sprite = getSprite(objDef?.type || 'monster')
-      ctx.font = `${target.size * 0.7}px serif`
+      ctx.font = `${target.size * 0.8}px serif`
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'
       ctx.fillText(sprite, 0, 0)
@@ -162,7 +180,7 @@ export const clickerTemplate = {
 }
 
 function spawnTarget(engine) {
-  const size = 70 + Math.random() * 25
+  const size = 90 + Math.random() * 30
   const margin = 60
   engine.set('currentTarget', {
     x: margin + Math.random() * (GAME_WIDTH - size - margin * 2),
@@ -170,4 +188,5 @@ function spawnTarget(engine) {
     size,
   })
   engine.set('targetTimer', 0)
+  engine.set('sparkleTimer', 0)
 }

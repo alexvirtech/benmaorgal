@@ -4,8 +4,8 @@ import { getSprite } from '../game-data/schema.js'
 
 const GRAVITY = 900
 const FLAP_POWER = -320
-const GAP_SIZE = 180
-const PIPE_W = 60
+const GAP_SIZE = 190
+const PIPE_W = 65
 const PIPE_SPEED = 3.2
 
 export const flappyTemplate = {
@@ -26,14 +26,14 @@ export const flappyTemplate = {
       template: 'flappy',
       title: 'Flappy Bird',
       theme: { background: 'sky' },
-      player: { type: 'bird', size: 50, speed: 5 },
+      player: { type: 'bird', size: 68, speed: 5 },
       objects: [],
       rules: { startingLives: 3, targetScore: 50, difficulty: 'normal' },
     }
   },
 
   setup(engine, def) {
-    const size = def.player.size || 50
+    const size = def.player.size || 68
     engine.addEntity({
       role: 'player',
       type: def.player.type,
@@ -61,7 +61,7 @@ export const flappyTemplate = {
 
     if (input.actions.jump || input.pointer.clicked) {
       player.vy = FLAP_POWER
-      engine.spawnParticles(player.x, player.y + player.height / 2, '#ffffff', 4, 1.5)
+      engine.spawnParticles(player.x, player.y + player.height / 2, '#ffffff', 8, 2.5)
     }
 
     player.vy += GRAVITY * dt
@@ -73,6 +73,8 @@ export const flappyTemplate = {
       player.vy = 0
     }
 
+    engine.spawnTrail(player.x, player.y + player.height / 2, '#ffdd66', 2)
+
     let inv = engine.get('invincible')
     if (inv > 0) engine.set('invincible', inv - dt)
 
@@ -82,7 +84,8 @@ export const flappyTemplate = {
       if (inv <= 0) {
         engine.loseLife()
         engine.set('invincible', 1.0)
-        engine.spawnParticles(player.x + player.width / 2, player.y + player.height, '#ff4444', 10, 3)
+        engine.screenShake(6, 0.1)
+        engine.spawnParticles(player.x + player.width / 2, player.y + player.height, '#ff4444', 14, 4)
       }
     }
 
@@ -140,7 +143,8 @@ export const flappyTemplate = {
           player.y + player.height * 0.3 < e.y + e.height - 4) {
         engine.loseLife()
         engine.set('invincible', 1.0)
-        engine.spawnParticles(player.x + player.width / 2, player.y + player.height / 2, '#ff4444', 12, 4)
+        engine.screenShake(8, 0.15)
+        engine.spawnParticles(player.x + player.width / 2, player.y + player.height / 2, '#ff4444', 18, 5)
         player.vy = FLAP_POWER * 0.6
       }
     }
@@ -199,6 +203,8 @@ export const flappyTemplate = {
       ctx.save()
       ctx.translate(player.x + player.width / 2, player.y + player.height / 2)
       ctx.rotate(player.angle || 0)
+      const wingFlap = 1 + Math.sin(engine.state.elapsed * 12) * 0.06
+      ctx.scale(wingFlap, 1 / wingFlap)
       const sprite = getSprite(engine.definition?.player?.type || 'bird')
       ctx.font = `${player.width * 0.85}px serif`
       ctx.textAlign = 'center'

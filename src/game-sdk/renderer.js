@@ -38,29 +38,62 @@ export function drawBackground(ctx, theme) {
   }
 }
 
-export function drawEntity(ctx, entity) {
+export function drawEntity(ctx, entity, time) {
   if (!entity.visible || !entity.active) return
+
+  ctx.save()
+
+  const cx = entity.x + entity.width / 2
+  const cy = entity.y + entity.height / 2
+
+  let offsetY = 0
+  let scale = 1
+  let rotation = 0
+
+  if (time !== undefined) {
+    if (entity.bob) {
+      offsetY = Math.sin(time * (entity.bobSpeed || 3) + (entity.bobPhase || 0)) * (entity.bobAmount || 5)
+    }
+    if (entity.pulse) {
+      scale = 1 + Math.sin(time * (entity.pulseSpeed || 4) + (entity.pulsePhase || 0)) * (entity.pulseAmount || 0.08)
+    }
+    if (entity.spin) {
+      rotation = time * (entity.spinSpeed || 2)
+    }
+  }
+
+  if (entity.glow) {
+    ctx.shadowColor = entity.glowColor || '#ffd700'
+    ctx.shadowBlur = entity.glowSize || 12
+  }
+
+  ctx.translate(cx, cy + offsetY)
+  if (scale !== 1) ctx.scale(scale, scale)
+  if (rotation) ctx.rotate(rotation)
 
   if (entity.sprite) {
     const size = Math.max(entity.width, entity.height)
     ctx.font = `${size * 0.85}px serif`
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
-    ctx.fillText(entity.sprite, entity.x + entity.width / 2, entity.y + entity.height / 2)
+    ctx.fillText(entity.sprite, 0, 0)
   } else if (entity.color) {
     ctx.fillStyle = entity.color
     if (entity.shape === 'circle') {
       ctx.beginPath()
-      ctx.arc(entity.x + entity.width / 2, entity.y + entity.height / 2, entity.width / 2, 0, Math.PI * 2)
+      ctx.arc(0, 0, entity.width / 2, 0, Math.PI * 2)
       ctx.fill()
     } else {
-      ctx.fillRect(entity.x, entity.y, entity.width, entity.height)
+      ctx.fillRect(-entity.width / 2, -entity.height / 2, entity.width, entity.height)
     }
   }
+
+  ctx.shadowBlur = 0
+  ctx.restore()
 }
 
-export function drawEntities(ctx, entities) {
+export function drawEntities(ctx, entities, time) {
   for (const e of entities.values()) {
-    drawEntity(ctx, e)
+    drawEntity(ctx, e, time)
   }
 }

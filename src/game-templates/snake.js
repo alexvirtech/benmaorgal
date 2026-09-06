@@ -2,7 +2,7 @@ import { GAME_WIDTH, GAME_HEIGHT } from '../game-sdk/engine.js'
 import { drawBackground } from '../game-sdk/renderer.js'
 import { getSprite } from '../game-data/schema.js'
 
-const CELL = 24
+const CELL = 30
 const COLS = Math.floor(GAME_WIDTH / CELL)
 const ROWS = Math.floor((GAME_HEIGHT - 40) / CELL)
 const HUD_H = 40
@@ -77,8 +77,9 @@ export const snakeTemplate = {
       engine.spawnParticles(
         snake[0].x * CELL + CELL / 2,
         HUD_H + snake[0].y * CELL + CELL / 2,
-        '#ff4444', 14, 4
+        '#ff4444', 20, 5
       )
+      engine.screenShake(10, 0.2)
       engine.lose()
       return
     }
@@ -88,12 +89,17 @@ export const snakeTemplate = {
         engine.spawnParticles(
           head.x * CELL + CELL / 2,
           HUD_H + head.y * CELL + CELL / 2,
-          '#ff4444', 14, 4
+          '#ff4444', 20, 5
         )
+        engine.screenShake(10, 0.2)
         engine.lose()
         return
       }
     }
+
+    const tail = snake[snake.length - 1]
+    const tailX = tail.x * CELL + CELL / 2
+    const tailY = HUD_H + tail.y * CELL + CELL / 2
 
     snake.unshift(head)
 
@@ -103,7 +109,7 @@ export const snakeTemplate = {
       engine.spawnParticles(
         food.x * CELL + CELL / 2,
         HUD_H + food.y * CELL + CELL / 2,
-        '#ffd700', 10, 3
+        '#ffd700', 14, 4
       )
       engine.spawnFloatingText(
         food.x * CELL + CELL / 2,
@@ -114,6 +120,7 @@ export const snakeTemplate = {
       const newInterval = Math.max(0.05, engine.get('moveInterval') - 0.003)
       engine.set('moveInterval', newInterval)
     } else {
+      engine.spawnTrail(tailX, tailY, '#2ecc71', 3)
       snake.pop()
     }
 
@@ -129,18 +136,20 @@ export const snakeTemplate = {
     ctx.fillRect(0, HUD_H, COLS * CELL, ROWS * CELL)
 
     const snake = engine.get('snake') || []
-    for (let i = 0; i < snake.length; i++) {
+    for (let i = snake.length - 1; i >= 0; i--) {
       const seg = snake[i]
+      const segSize = Math.max(CELL * 0.5, CELL - 2 - i * 0.3)
+      const offset = (CELL - segSize) / 2
       const brightness = i === 0 ? '#27ae60' : '#2ecc71'
       ctx.fillStyle = brightness
       ctx.beginPath()
-      ctx.roundRect(seg.x * CELL + 1, HUD_H + seg.y * CELL + 1, CELL - 2, CELL - 2, 5)
+      ctx.roundRect(seg.x * CELL + offset, HUD_H + seg.y * CELL + offset, segSize, segSize, 6)
       ctx.fill()
     }
 
     if (snake.length > 0) {
       const head = snake[0]
-      ctx.font = `${CELL * 0.75}px serif`
+      ctx.font = `${CELL * 0.85}px serif`
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'
       ctx.fillText('🐍', head.x * CELL + CELL / 2, HUD_H + head.y * CELL + CELL / 2)
@@ -150,10 +159,21 @@ export const snakeTemplate = {
     if (food) {
       const foodObj = engine.definition?.objects?.[0]
       const sprite = getSprite(foodObj?.type || 'apple')
-      ctx.font = `${CELL * 0.85}px serif`
+      const foodCx = food.x * CELL + CELL / 2
+      const foodCy = HUD_H + food.y * CELL + CELL / 2
+
+      ctx.save()
+      ctx.translate(foodCx, foodCy)
+      const s = 1 + Math.sin(engine.state.elapsed * 5) * 0.12
+      ctx.scale(s, s)
+      ctx.shadowColor = '#ffd700'
+      ctx.shadowBlur = 12
+      ctx.font = `${CELL}px serif`
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'
-      ctx.fillText(sprite, food.x * CELL + CELL / 2, HUD_H + food.y * CELL + CELL / 2)
+      ctx.fillText(sprite, 0, 0)
+      ctx.shadowBlur = 0
+      ctx.restore()
     }
   },
 }

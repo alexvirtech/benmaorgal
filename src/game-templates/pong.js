@@ -1,9 +1,9 @@
 import { GAME_WIDTH, GAME_HEIGHT, moveTowardsMouse } from '../game-sdk/engine.js'
 import { drawBackground } from '../game-sdk/renderer.js'
 
-const PADDLE_W = 140
-const PADDLE_H = 16
-const BALL_SIZE = 16
+const PADDLE_W = 155
+const PADDLE_H = 18
+const BALL_SIZE = 22
 const HUD_H = 40
 
 export const pongTemplate = {
@@ -53,6 +53,9 @@ export const pongTemplate = {
       height: BALL_SIZE,
       vx: 4.5 * (Math.random() > 0.5 ? 1 : -1),
       vy: 4.5,
+      glow: true,
+      glowColor: '#ffd700',
+      glowSize: 15,
     })
 
     engine.state.lives = def.rules.startingLives
@@ -73,8 +76,18 @@ export const pongTemplate = {
     ball.x += ball.vx * dt * 60
     ball.y += ball.vy * dt * 60
 
-    if (ball.x <= 0) { ball.vx = Math.abs(ball.vx); ball.x = 0 }
-    if (ball.x + ball.width >= GAME_WIDTH) { ball.vx = -Math.abs(ball.vx); ball.x = GAME_WIDTH - ball.width }
+    engine.spawnTrail(ball.x + ball.width / 2, ball.y + ball.height / 2, '#ffd700', 2)
+
+    if (ball.x <= 0) {
+      ball.vx = Math.abs(ball.vx)
+      ball.x = 0
+      engine.spawnParticles(ball.x + ball.width / 2, ball.y + ball.height / 2, '#aaaaff', 4, 2)
+    }
+    if (ball.x + ball.width >= GAME_WIDTH) {
+      ball.vx = -Math.abs(ball.vx)
+      ball.x = GAME_WIDTH - ball.width
+      engine.spawnParticles(ball.x + ball.width / 2, ball.y + ball.height / 2, '#aaaaff', 4, 2)
+    }
     if (ball.y <= HUD_H) {
       ball.vy = Math.abs(ball.vy)
       ball.y = HUD_H
@@ -92,13 +105,14 @@ export const pongTemplate = {
       const hit = (ball.x + ball.width / 2 - player.x) / player.width
       ball.vx = (hit - 0.5) * 10
       engine.addScore(1)
-      engine.spawnParticles(ball.x + ball.width / 2, player.y, '#ffd700', 8, 2)
+      engine.spawnParticles(ball.x + ball.width / 2, player.y, '#ffd700', 12, 2)
       engine.spawnFloatingText(ball.x + ball.width / 2, player.y - 20, '+1')
     }
 
     if (ball.y > GAME_HEIGHT + 20) {
       engine.loseLife()
-      engine.spawnParticles(ball.x + ball.width / 2, GAME_HEIGHT, '#ff4444', 10, 3)
+      engine.screenShake(6, 0.1)
+      engine.spawnParticles(ball.x + ball.width / 2, GAME_HEIGHT, '#ff4444', 14, 3)
       ball.x = GAME_WIDTH / 2 - BALL_SIZE / 2
       ball.y = GAME_HEIGHT / 2
       ball.vx = 4.5 * (Math.random() > 0.5 ? 1 : -1)
@@ -127,15 +141,18 @@ export const pongTemplate = {
       ctx.fillStyle = e.color || '#fff'
       if (e.shape === 'circle') {
         ctx.shadowColor = '#ffd700'
-        ctx.shadowBlur = 10
+        ctx.shadowBlur = 15
         ctx.beginPath()
         ctx.arc(e.x + e.width / 2, e.y + e.height / 2, e.width / 2, 0, Math.PI * 2)
         ctx.fill()
         ctx.shadowBlur = 0
       } else {
+        ctx.shadowColor = '#ffffff'
+        ctx.shadowBlur = 6
         ctx.beginPath()
         ctx.roundRect(e.x, e.y, e.width, e.height, 4)
         ctx.fill()
+        ctx.shadowBlur = 0
       }
     }
   },

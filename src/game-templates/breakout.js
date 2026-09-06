@@ -1,9 +1,9 @@
 import { GAME_WIDTH, GAME_HEIGHT, moveTowardsMouse } from '../game-sdk/engine.js'
 import { drawBackground } from '../game-sdk/renderer.js'
 
-const PADDLE_W = 140
-const PADDLE_H = 14
-const BALL_SIZE = 16
+const PADDLE_W = 155
+const PADDLE_H = 18
+const BALL_SIZE = 20
 const BRICK_ROWS = 6
 const BRICK_COLS = 10
 const BRICK_W = (GAME_WIDTH - 40) / BRICK_COLS
@@ -59,6 +59,9 @@ export const breakoutTemplate = {
       height: BALL_SIZE,
       vx: 3.5 * (Math.random() > 0.5 ? 1 : -1),
       vy: -5,
+      glow: true,
+      glowColor: '#fff',
+      glowSize: 10,
     })
 
     for (let row = 0; row < BRICK_ROWS; row++) {
@@ -93,9 +96,23 @@ export const breakoutTemplate = {
     ball.x += ball.vx * dt * 60
     ball.y += ball.vy * dt * 60
 
-    if (ball.x <= 0) { ball.vx = Math.abs(ball.vx); ball.x = 0 }
-    if (ball.x + ball.width >= GAME_WIDTH) { ball.vx = -Math.abs(ball.vx); ball.x = GAME_WIDTH - ball.width }
-    if (ball.y <= HUD_H) { ball.vy = Math.abs(ball.vy); ball.y = HUD_H }
+    engine.spawnTrail(ball.x + ball.width / 2, ball.y + ball.height / 2, '#ffffff', 2)
+
+    if (ball.x <= 0) {
+      ball.vx = Math.abs(ball.vx)
+      ball.x = 0
+      engine.spawnParticles(ball.x + ball.width / 2, ball.y + ball.height / 2, '#aaaaff', 3, 2)
+    }
+    if (ball.x + ball.width >= GAME_WIDTH) {
+      ball.vx = -Math.abs(ball.vx)
+      ball.x = GAME_WIDTH - ball.width
+      engine.spawnParticles(ball.x + ball.width / 2, ball.y + ball.height / 2, '#aaaaff', 3, 2)
+    }
+    if (ball.y <= HUD_H) {
+      ball.vy = Math.abs(ball.vy)
+      ball.y = HUD_H
+      engine.spawnParticles(ball.x + ball.width / 2, HUD_H, '#aaaaff', 3, 2)
+    }
 
     if (
       ball.vy > 0 &&
@@ -107,12 +124,13 @@ export const breakoutTemplate = {
       ball.y = player.y - ball.height
       const hit = (ball.x + ball.width / 2 - player.x) / player.width
       ball.vx = (hit - 0.5) * 8
-      engine.spawnParticles(ball.x + ball.width / 2, player.y, '#ecf0f1', 5, 2)
+      engine.spawnParticles(ball.x + ball.width / 2, player.y, '#ecf0f1', 8, 2)
     }
 
     if (ball.y > GAME_HEIGHT + 20) {
       engine.loseLife()
-      engine.spawnParticles(ball.x + ball.width / 2, GAME_HEIGHT, '#ff4444', 10, 3)
+      engine.screenShake(8, 0.15)
+      engine.spawnParticles(ball.x + ball.width / 2, GAME_HEIGHT, '#ff4444', 14, 3)
       ball.x = GAME_WIDTH / 2 - BALL_SIZE / 2
       ball.y = GAME_HEIGHT - 70
       ball.vx = 3.5 * (Math.random() > 0.5 ? 1 : -1)
@@ -129,7 +147,8 @@ export const breakoutTemplate = {
       ) {
         engine.removeEntity(block.id)
         engine.addScore(block.points || 1)
-        engine.spawnParticles(block.x + block.width / 2, block.y + block.height / 2, block.color, 10, 3)
+        engine.screenShake(4, 0.08)
+        engine.spawnParticles(block.x + block.width / 2, block.y + block.height / 2, block.color, 16, 3)
         engine.spawnFloatingText(block.x + block.width / 2, block.y, `+${block.points || 1}`)
 
         const overlapLeft = ball.x + ball.width - block.x
@@ -160,7 +179,7 @@ export const breakoutTemplate = {
       ctx.fillStyle = e.color || '#fff'
       if (e.shape === 'circle') {
         ctx.shadowColor = '#fff'
-        ctx.shadowBlur = 8
+        ctx.shadowBlur = 12
         ctx.beginPath()
         ctx.arc(e.x + e.width / 2, e.y + e.height / 2, e.width / 2, 0, Math.PI * 2)
         ctx.fill()
@@ -173,9 +192,12 @@ export const breakoutTemplate = {
         ctx.lineWidth = 1
         ctx.stroke()
       } else {
+        ctx.shadowColor = '#ffffff'
+        ctx.shadowBlur = 6
         ctx.beginPath()
         ctx.roundRect(e.x, e.y, e.width, e.height, 4)
         ctx.fill()
+        ctx.shadowBlur = 0
       }
     }
   },
