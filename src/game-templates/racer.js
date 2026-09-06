@@ -6,6 +6,150 @@ const ROAD_LEFT = 150
 const ROAD_RIGHT = GAME_WIDTH - 150
 const LANE_W = (ROAD_RIGHT - ROAD_LEFT) / 3
 
+function drawF1Car(ctx, cx, cy, w, h, angle, color) {
+  ctx.save()
+  ctx.translate(cx, cy)
+  ctx.rotate(angle)
+
+  const hw = w / 2
+  const hh = h / 2
+
+  ctx.fillStyle = '#222'
+  ctx.fillRect(-hw * 0.95, -hh * 0.85, hw * 0.35, hh * 0.35)
+  ctx.fillRect(hw * 0.6, -hh * 0.85, hw * 0.35, hh * 0.35)
+  ctx.fillRect(-hw * 0.95, hh * 0.55, hw * 0.35, hh * 0.35)
+  ctx.fillRect(hw * 0.6, hh * 0.55, hw * 0.35, hh * 0.35)
+
+  ctx.fillStyle = '#333'
+  ctx.beginPath()
+  ctx.roundRect(-hw * 0.85, -hh * 0.88, hw * 0.25, hh * 0.4, 2)
+  ctx.fill()
+  ctx.beginPath()
+  ctx.roundRect(hw * 0.6, -hh * 0.88, hw * 0.25, hh * 0.4, 2)
+  ctx.fill()
+  ctx.beginPath()
+  ctx.roundRect(-hw * 0.85, hh * 0.52, hw * 0.25, hh * 0.4, 2)
+  ctx.fill()
+  ctx.beginPath()
+  ctx.roundRect(hw * 0.6, hh * 0.52, hw * 0.25, hh * 0.4, 2)
+  ctx.fill()
+
+  ctx.fillStyle = color
+  ctx.beginPath()
+  ctx.moveTo(0, -hh)
+  ctx.lineTo(hw * 0.45, -hh * 0.65)
+  ctx.lineTo(hw * 0.5, hh * 0.3)
+  ctx.lineTo(hw * 0.55, hh * 0.7)
+  ctx.lineTo(hw * 0.45, hh)
+  ctx.lineTo(-hw * 0.45, hh)
+  ctx.lineTo(-hw * 0.55, hh * 0.7)
+  ctx.lineTo(-hw * 0.5, hh * 0.3)
+  ctx.lineTo(-hw * 0.45, -hh * 0.65)
+  ctx.closePath()
+  ctx.fill()
+
+  ctx.strokeStyle = 'rgba(0,0,0,0.3)'
+  ctx.lineWidth = 1
+  ctx.stroke()
+
+  const darker = shadeColor(color, -30)
+  ctx.fillStyle = darker
+  ctx.beginPath()
+  ctx.moveTo(-hw * 0.15, -hh * 0.95)
+  ctx.lineTo(hw * 0.15, -hh * 0.95)
+  ctx.lineTo(hw * 0.1, -hh * 0.55)
+  ctx.lineTo(-hw * 0.1, -hh * 0.55)
+  ctx.closePath()
+  ctx.fill()
+
+  ctx.fillStyle = '#1a1a1a'
+  ctx.beginPath()
+  ctx.roundRect(-hw * 0.2, -hh * 0.15, hw * 0.4, hh * 0.3, 3)
+  ctx.fill()
+
+  ctx.fillStyle = 'rgba(100,180,255,0.5)'
+  ctx.beginPath()
+  ctx.roundRect(-hw * 0.15, -hh * 0.1, hw * 0.3, hh * 0.15, 2)
+  ctx.fill()
+
+  ctx.fillStyle = darker
+  ctx.beginPath()
+  ctx.moveTo(-hw * 0.35, hh * 0.5)
+  ctx.lineTo(hw * 0.35, hh * 0.5)
+  ctx.lineTo(hw * 0.5, hh * 0.85)
+  ctx.lineTo(-hw * 0.5, hh * 0.85)
+  ctx.closePath()
+  ctx.fill()
+
+  ctx.fillStyle = color
+  ctx.beginPath()
+  ctx.moveTo(-hw * 0.7, -hh * 0.7)
+  ctx.lineTo(hw * 0.7, -hh * 0.7)
+  ctx.lineTo(hw * 0.6, -hh * 0.6)
+  ctx.lineTo(-hw * 0.6, -hh * 0.6)
+  ctx.closePath()
+  ctx.fill()
+  ctx.strokeStyle = 'rgba(0,0,0,0.2)'
+  ctx.lineWidth = 0.5
+  ctx.stroke()
+
+  ctx.fillStyle = color
+  ctx.beginPath()
+  ctx.moveTo(-hw * 0.55, hh * 0.9)
+  ctx.lineTo(hw * 0.55, hh * 0.9)
+  ctx.lineTo(hw * 0.65, hh)
+  ctx.lineTo(-hw * 0.65, hh)
+  ctx.closePath()
+  ctx.fill()
+  ctx.stroke()
+
+  ctx.restore()
+}
+
+function drawTrafficCar(ctx, cx, cy, w, h, color) {
+  ctx.save()
+  ctx.translate(cx, cy)
+
+  const hw = w / 2
+  const hh = h / 2
+
+  ctx.fillStyle = '#222'
+  ctx.fillRect(-hw * 0.9, -hh * 0.8, hw * 0.3, hh * 0.3)
+  ctx.fillRect(hw * 0.6, -hh * 0.8, hw * 0.3, hh * 0.3)
+  ctx.fillRect(-hw * 0.9, hh * 0.5, hw * 0.3, hh * 0.3)
+  ctx.fillRect(hw * 0.6, hh * 0.5, hw * 0.3, hh * 0.3)
+
+  ctx.fillStyle = color
+  ctx.beginPath()
+  ctx.roundRect(-hw * 0.5, -hh, hw, hh * 2, [hw * 0.4, hw * 0.4, hw * 0.15, hw * 0.15])
+  ctx.fill()
+
+  ctx.fillStyle = 'rgba(100,180,255,0.4)'
+  ctx.beginPath()
+  ctx.roundRect(-hw * 0.3, -hh * 0.6, hw * 0.6, hh * 0.35, 3)
+  ctx.fill()
+
+  ctx.fillStyle = 'rgba(255,100,100,0.5)'
+  ctx.beginPath()
+  ctx.roundRect(-hw * 0.3, hh * 0.55, hw * 0.25, hh * 0.15, 2)
+  ctx.fill()
+  ctx.beginPath()
+  ctx.roundRect(hw * 0.05, hh * 0.55, hw * 0.25, hh * 0.15, 2)
+  ctx.fill()
+
+  ctx.restore()
+}
+
+function shadeColor(color, percent) {
+  const num = parseInt(color.replace('#', ''), 16)
+  const r = Math.min(255, Math.max(0, (num >> 16) + percent))
+  const g = Math.min(255, Math.max(0, ((num >> 8) & 0x00FF) + percent))
+  const b = Math.min(255, Math.max(0, (num & 0x0000FF) + percent))
+  return '#' + (0x1000000 + r * 0x10000 + g * 0x100 + b).toString(16).slice(1)
+}
+
+const TRAFFIC_COLORS = ['#3498db', '#e67e22', '#9b59b6', '#1abc9c', '#e74c3c', '#f39c12']
+
 export const racerTemplate = {
   id: 'racer',
   name: 'Racer',
@@ -36,13 +180,14 @@ export const racerTemplate = {
     const size = def.player.size || 60
     engine.addEntity({
       role: 'player',
-      type: def.player.type,
-      sprite: getSprite(def.player.type),
+      type: 'f1car',
       x: GAME_WIDTH / 2 - size / 2,
-      y: GAME_HEIGHT - size - 30,
+      y: GAME_HEIGHT - size * 1.4 - 30,
       width: size,
-      height: size,
+      height: size * 1.4,
       speed: def.player.speed,
+      angle: 0,
+      prevX: GAME_WIDTH / 2 - size / 2,
     })
     engine.state.lives = def.rules.startingLives
     engine.set('spawnTimer', 0)
@@ -57,9 +202,15 @@ export const racerTemplate = {
     const player = engine.getPlayer()
     if (!player) return
 
+    const prevX = player.prevX || player.x
     moveTowardsMouse(player, input, dt, 0.15)
     if (player.x < ROAD_LEFT + 5) player.x = ROAD_LEFT + 5
     if (player.x + player.width > ROAD_RIGHT - 5) player.x = ROAD_RIGHT - player.width - 5
+
+    const dx = player.x - prevX
+    const targetAngle = Math.max(-0.35, Math.min(0.35, dx * 0.08))
+    player.angle = player.angle * 0.85 + targetAngle * 0.15
+    player.prevX = player.x
 
     const gameSpeed = engine.get('gameSpeed') || 1
     engine.set('roadOffset', (engine.get('roadOffset') + dt * 200 * gameSpeed) % 40)
@@ -71,15 +222,16 @@ export const racerTemplate = {
     if (timer >= obs.spawnRate) {
       engine.set('spawnTimer', 0)
       const lane = Math.floor(Math.random() * 3)
-      const size = 50
+      const w = 44
+      const h = 62
       engine.addEntity({
         role: 'hazard',
-        type: obs.type,
-        sprite: getSprite(obs.type),
-        x: ROAD_LEFT + lane * LANE_W + (LANE_W - size) / 2,
-        y: -60,
-        width: size,
-        height: 55,
+        type: 'traffic',
+        carColor: TRAFFIC_COLORS[Math.floor(Math.random() * TRAFFIC_COLORS.length)],
+        x: ROAD_LEFT + lane * LANE_W + (LANE_W - w) / 2,
+        y: -h - 10,
+        width: w,
+        height: h,
         vy: obs.speed * gameSpeed,
       })
     } else {
@@ -101,7 +253,7 @@ export const racerTemplate = {
     for (const e of engine.entities.values()) {
       if (e.role === 'player') continue
       e.y += e.vy * dt * 60
-      if (e.y > GAME_HEIGHT + 50) {
+      if (e.y > GAME_HEIGHT + 70) {
         toRemove.push(e.id)
         continue
       }
@@ -122,18 +274,35 @@ export const racerTemplate = {
   render(engine, ctx) {
     const bg = engine.definition?.theme?.background || 'city'
     const isNight = bg === 'night'
+
     ctx.fillStyle = isNight ? '#1a1a2e' : '#4a7c30'
     ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT)
 
-    ctx.fillStyle = '#555'
+    if (!isNight) {
+      ctx.fillStyle = '#3d6b20'
+      for (let y = -20; y < GAME_HEIGHT; y += 80) {
+        ctx.fillRect(20, y + ((engine.get('roadOffset') || 0) * 2) % 80, 8, 30)
+        ctx.fillRect(GAME_WIDTH - 28, y + ((engine.get('roadOffset') || 0) * 2 + 40) % 80, 8, 30)
+      }
+    }
+
+    ctx.fillStyle = isNight ? '#333' : '#555'
     ctx.fillRect(ROAD_LEFT, 0, ROAD_RIGHT - ROAD_LEFT, GAME_HEIGHT)
 
+    ctx.fillStyle = isNight ? '#ff4444' : '#cc0000'
+    for (let y = 0; y < GAME_HEIGHT; y += 30) {
+      const stripe = Math.floor((y + (engine.get('roadOffset') || 0) * 2) / 15) % 2
+      ctx.fillStyle = stripe ? (isNight ? '#ff4444' : '#cc0000') : '#eee'
+      ctx.fillRect(ROAD_LEFT - 8, y, 8, 15)
+      ctx.fillRect(ROAD_RIGHT, y, 8, 15)
+    }
+
     ctx.fillStyle = '#eee'
-    ctx.fillRect(ROAD_LEFT, 0, 4, GAME_HEIGHT)
-    ctx.fillRect(ROAD_RIGHT - 4, 0, 4, GAME_HEIGHT)
+    ctx.fillRect(ROAD_LEFT, 0, 3, GAME_HEIGHT)
+    ctx.fillRect(ROAD_RIGHT - 3, 0, 3, GAME_HEIGHT)
 
     const offset = engine.get('roadOffset') || 0
-    ctx.strokeStyle = '#fff'
+    ctx.strokeStyle = 'rgba(255,255,255,0.6)'
     ctx.lineWidth = 2
     ctx.setLineDash([20, 20])
     ctx.lineDashOffset = -offset
@@ -147,14 +316,15 @@ export const racerTemplate = {
 
     for (const e of engine.entities.values()) {
       if (!e.active || !e.visible) continue
-      if (e.sprite) {
+      if (e.role === 'player') {
+        drawF1Car(ctx, e.x + e.width / 2, e.y + e.height / 2, e.width, e.height, e.angle || 0, '#e00000')
+      } else if (e.type === 'traffic') {
+        drawTrafficCar(ctx, e.x + e.width / 2, e.y + e.height / 2, e.width, e.height, e.carColor || '#3498db')
+      } else if (e.sprite) {
         ctx.font = `${Math.max(e.width, e.height) * 0.85}px serif`
         ctx.textAlign = 'center'
         ctx.textBaseline = 'middle'
         ctx.fillText(e.sprite, e.x + e.width / 2, e.y + e.height / 2)
-      } else if (e.color) {
-        ctx.fillStyle = e.color
-        ctx.fillRect(e.x, e.y, e.width, e.height)
       }
     }
   },
