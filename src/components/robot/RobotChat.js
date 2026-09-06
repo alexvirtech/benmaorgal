@@ -1,14 +1,81 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
+
+function useSpeechRecognition(lang, onResult) {
+  const recognitionRef = useRef(null)
+  const [listening, setListening] = useState(false)
+
+  const start = useCallback(() => {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition
+    if (!SR) return
+    const recognition = new SR()
+    recognition.lang = lang
+    recognition.interimResults = false
+    recognition.maxAlternatives = 1
+    recognition.onresult = (e) => {
+      const text = e.results[0][0].transcript
+      onResult(text)
+      setListening(false)
+    }
+    recognition.onerror = () => setListening(false)
+    recognition.onend = () => setListening(false)
+    recognitionRef.current = recognition
+    recognition.start()
+    setListening(true)
+  }, [lang, onResult])
+
+  const stop = useCallback(() => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop()
+      recognitionRef.current = null
+    }
+    setListening(false)
+  }, [])
+
+  return { listening, start, stop }
+}
+
+async function translateHebrewToEnglish(text) {
+  try {
+    const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=he|en`
+    const res = await fetch(url)
+    const data = await res.json()
+    if (data.responseStatus === 200 && data.responseData?.translatedText) {
+      return data.responseData.translatedText
+    }
+    return text
+  } catch {
+    return text
+  }
+}
 
 export default function RobotChat({ messages, suggestions, onSend, disabled }) {
   const [input, setInput] = useState('')
+  const [translating, setTranslating] = useState(false)
   const messagesEndRef = useRef(null)
+  const textareaRef = useRef(null)
+
+  const hasSpeech = typeof window !== 'undefined' &&
+    (window.SpeechRecognition || window.webkitSpeechRecognition)
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
+
+  const handleEnglishResult = useCallback((text) => {
+    setInput(prev => prev ? prev + ' ' + text : text)
+  }, [])
+
+  const handleHebrewResult = useCallback(async (text) => {
+    setTranslating(true)
+    const translated = await translateHebrewToEnglish(text)
+    setInput(prev => prev ? prev + ' ' + translated : translated)
+    setTranslating(false)
+  }, [])
+
+  const enSpeech = useSpeechRecognition('en-US', handleEnglishResult)
+  const heSpeech = useSpeechRecognition('he-IL', handleHebrewResult)
 
   const handleSend = () => {
     const text = input.trim()
@@ -19,6 +86,13 @@ export default function RobotChat({ messages, suggestions, onSend, disabled }) {
 
   const handleChip = (text) => {
     onSend(text)
+  }
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      handleSend()
+    }
   }
 
   return (
@@ -110,51 +184,121 @@ export default function RobotChat({ messages, suggestions, onSend, disabled }) {
         padding: '12px',
         borderTop: '1px solid #eee',
         display: 'flex',
+        flexDirection: 'column',
         gap: '8px',
       }}>
-        <div style={{ flex: 1, position: 'relative', display: 'flex', alignItems: 'center' }}>
-          <span style={{ position: 'absolute', left: '12px', fontSize: '1.1rem', opacity: 0.4 }}>🎤</span>
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => { if (e.key === 'Enter') handleSend() }}
-            placeholder="Tell me what to change..."
-            disabled={disabled}
-            style={{
-              width: '100%',
-              padding: '10px 12px 10px 40px',
-              borderRadius: '24px',
-              border: '2px solid #dfe6e9',
-              fontSize: '0.95rem',
-              outline: 'none',
-              transition: 'border-color 0.2s',
-            }}
-            onFocus={(e) => { e.target.style.borderColor = '#6c5ce7' }}
-            onBlur={(e) => { e.target.style.borderColor = '#dfe6e9' }}
-          />
-        </div>
-        <button
-          onClick={handleSend}
-          disabled={disabled || !input.trim()}
+        <textarea
+          ref={textareaRef}
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="Tell me what to change..."
+          disabled={disabled || translating}
+          rows={3}
           style={{
-            width: '44px',
-            height: '44px',
-            borderRadius: '50%',
-            border: 'none',
-            background: input.trim() ? '#6c5ce7' : '#dfe6e9',
-            color: '#fff',
-            fontSize: '1.2rem',
-            cursor: input.trim() ? 'pointer' : 'default',
-            transition: 'background 0.2s',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            width: '100%',
+            padding: '12px 14px',
+            borderRadius: '14px',
+            border: '2px solid #dfe6e9',
+            fontSize: '0.95rem',
+            outline: 'none',
+            resize: 'none',
+            fontFamily: 'inherit',
+            lineHeight: '1.5',
+            transition: 'border-color 0.2s',
           }}
-        >
-          ➤
-        </button>
+          onFocus={(e) => { e.target.style.borderColor = '#6c5ce7' }}
+          onBlur={(e) => { e.target.style.borderColor = '#dfe6e9' }}
+        />
+
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          {hasSpeech && (
+            <>
+              <button
+                onClick={() => enSpeech.listening ? enSpeech.stop() : enSpeech.start()}
+                disabled={disabled || heSpeech.listening || translating}
+                title="English voice input"
+                style={{
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '50%',
+                  border: 'none',
+                  background: enSpeech.listening ? '#ff4444' : '#f0f0f5',
+                  color: enSpeech.listening ? '#fff' : '#666',
+                  fontSize: '1.1rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.2s',
+                  animation: enSpeech.listening ? 'pulse 1.2s ease-in-out infinite' : 'none',
+                  flexShrink: 0,
+                }}
+              >
+                🎤
+              </button>
+
+              <button
+                onClick={() => heSpeech.listening ? heSpeech.stop() : heSpeech.start()}
+                disabled={disabled || enSpeech.listening || translating}
+                title="Hebrew voice input (translates to English)"
+                style={{
+                  height: '40px',
+                  borderRadius: '20px',
+                  border: 'none',
+                  padding: '0 12px',
+                  background: heSpeech.listening ? '#ff4444' : (translating ? '#ffd700' : '#f0f0f5'),
+                  color: heSpeech.listening ? '#fff' : '#666',
+                  fontSize: '0.85rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  transition: 'all 0.2s',
+                  animation: heSpeech.listening ? 'pulse 1.2s ease-in-out infinite' : 'none',
+                  flexShrink: 0,
+                }}
+              >
+                🎤 🇮🇱
+                {translating && <span style={{ fontSize: '0.75rem' }}>...</span>}
+              </button>
+            </>
+          )}
+
+          <div style={{ flex: 1 }} />
+
+          <button
+            onClick={handleSend}
+            disabled={disabled || !input.trim() || translating}
+            style={{
+              height: '40px',
+              padding: '0 20px',
+              borderRadius: '20px',
+              border: 'none',
+              background: input.trim() ? '#6c5ce7' : '#dfe6e9',
+              color: '#fff',
+              fontSize: '0.95rem',
+              fontWeight: 600,
+              cursor: input.trim() ? 'pointer' : 'default',
+              transition: 'background 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              flexShrink: 0,
+            }}
+          >
+            Send ➤
+          </button>
+        </div>
       </div>
+
+      <style>{`
+        @keyframes pulse {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(255,68,68,0.4); }
+          50% { box-shadow: 0 0 0 8px rgba(255,68,68,0); }
+        }
+      `}</style>
     </div>
   )
 }

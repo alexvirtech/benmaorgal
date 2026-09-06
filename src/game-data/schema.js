@@ -1,4 +1,4 @@
-export const TEMPLATES = ['catch', 'dodge', 'jumper', 'shooter', 'pong', 'breakout', 'snake', 'memory', 'clicker', 'racer']
+export const TEMPLATES = ['catch', 'dodge', 'jumper', 'shooter', 'pong', 'breakout', 'snake', 'memory', 'clicker', 'racer', 'flappy', 'whack']
 
 export const SPRITES = {
   cat: '🐱', dog: '🐶', frog: '🐸', robot: '🤖', spaceship: '🚀',
@@ -9,6 +9,7 @@ export const SPRITES = {
   lightning: '⚡', spike: '🔱', ghost: '👻',
   ball: '⚪', brick: '🟫', paddle: '', snake: '🟩', food: '🍎',
   card: '🃏', target: '🎯', tree: '🌲', barrel: '🛢️',
+  mole: '🐹', hammer: '🔨', pipe: '🟩',
 }
 
 export const BACKGROUNDS = ['sky', 'space', 'forest', 'city', 'ocean', 'desert', 'grass', 'night']

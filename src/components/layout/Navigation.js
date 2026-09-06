@@ -19,9 +19,9 @@ export default function Navigation() {
         <Link href="/games" className={`nav-link ${pathname === '/games' ? 'active' : ''}`}>
           📦 My Games
         </Link>
-        <Link href="/battle" className="nav-link">
+        <a href="/battle" target="_blank" rel="noopener noreferrer" className="nav-link">
           ⚔️ Battle
-        </Link>
+        </a>
       </div>
     </nav>
   )

@@ -49,6 +49,16 @@ export const TEMPLATE_PATTERNS = [
     keywords: ['car', 'race', 'racing', 'drive', 'avoid cars', 'road', 'highway'],
     icon: '🏎️',
   },
+  {
+    template: 'flappy',
+    keywords: ['flappy', 'fly', 'flying', 'flap', 'pipes', 'wings', 'fly through'],
+    icon: '🐦',
+  },
+  {
+    template: 'whack',
+    keywords: ['whack', 'mole', 'whack-a-mole', 'whack a mole', 'pop up', 'hammer', 'smash moles'],
+    icon: '🔨',
+  },
 ]
 
 export const PLAYER_TYPES = {

@@ -8,6 +8,8 @@ import { snakeTemplate } from './snake.js'
 import { memoryTemplate } from './memory.js'
 import { clickerTemplate } from './clicker.js'
 import { racerTemplate } from './racer.js'
+import { flappyTemplate } from './flappy.js'
+import { whackTemplate } from './whack.js'
 
 const templates = {
   catch: catchTemplate,
@@ -20,6 +22,8 @@ const templates = {
   memory: memoryTemplate,
   clicker: clickerTemplate,
   racer: racerTemplate,
+  flappy: flappyTemplate,
+  whack: whackTemplate,
 }
 
 export function getTemplate(id) {

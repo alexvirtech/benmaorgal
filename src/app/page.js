@@ -164,7 +164,7 @@ export default function HomePage() {
 
           <div style={{ marginTop: '48px', paddingTop: '24px', borderTop: '1px solid #eee' }}>
             <p style={{ color: '#b2bec3', marginBottom: '8px' }}>Already using Ben&apos;s Brawl Apps?</p>
-            <a href="/battle" className="btn btn-secondary btn-sm">
+            <a href="/battle" target="_blank" rel="noopener noreferrer" className="btn btn-secondary btn-sm">
               ⚔️ Open Battle Apps
             </a>
           </div>
