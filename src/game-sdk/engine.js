@@ -7,6 +7,8 @@ export class GameEngine {
     this.ctx = canvas.getContext('2d')
     this.entities = new Map()
     this.nextId = 1
+    this.particles = []
+    this.floatingTexts = []
     this.state = {
       status: 'ready',
       score: 0,
@@ -133,6 +135,69 @@ export class GameEngine {
     this.emit('lose', this.state)
   }
 
+  spawnParticles(x, y, color, count = 8, spread = 3) {
+    for (let i = 0; i < count; i++) {
+      const angle = (Math.PI * 2 * i) / count + Math.random() * 0.5
+      const speed = spread * (0.5 + Math.random())
+      this.particles.push({
+        x, y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        life: 0.6 + Math.random() * 0.4,
+        maxLife: 0.6 + Math.random() * 0.4,
+        size: 3 + Math.random() * 4,
+        color,
+      })
+    }
+  }
+
+  spawnFloatingText(x, y, text, color = '#ffd700') {
+    this.floatingTexts.push({
+      x, y, text, color,
+      life: 1.0,
+      vy: -2,
+    })
+  }
+
+  updateParticles(dt) {
+    for (let i = this.particles.length - 1; i >= 0; i--) {
+      const p = this.particles[i]
+      p.x += p.vx * dt * 60
+      p.y += p.vy * dt * 60
+      p.vy += 3 * dt
+      p.life -= dt
+      if (p.life <= 0) this.particles.splice(i, 1)
+    }
+    for (let i = this.floatingTexts.length - 1; i >= 0; i--) {
+      const ft = this.floatingTexts[i]
+      ft.y += ft.vy * dt * 60
+      ft.life -= dt
+      if (ft.life <= 0) this.floatingTexts.splice(i, 1)
+    }
+  }
+
+  renderParticles(ctx) {
+    for (const p of this.particles) {
+      const alpha = p.life / p.maxLife
+      ctx.globalAlpha = alpha
+      ctx.fillStyle = p.color
+      ctx.beginPath()
+      ctx.arc(p.x, p.y, p.size * alpha, 0, Math.PI * 2)
+      ctx.fill()
+    }
+    ctx.globalAlpha = 1
+
+    for (const ft of this.floatingTexts) {
+      ctx.globalAlpha = ft.life
+      ctx.fillStyle = ft.color
+      ctx.font = 'bold 20px sans-serif'
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      ctx.fillText(ft.text, ft.x, ft.y)
+    }
+    ctx.globalAlpha = 1
+  }
+
   start() {
     this.state.status = 'playing'
     this.state.isPaused = false
@@ -168,6 +233,8 @@ export class GameEngine {
   restart() {
     this.stop()
     this.clearEntities()
+    this.particles = []
+    this.floatingTexts = []
     this._customState = {}
     this._listeners = {}
     this.state = {
@@ -193,6 +260,7 @@ export class GameEngine {
 
       if (this.state.status === 'playing') {
         this.state.elapsed += dt
+        this.updateParticles(dt)
         if (this.template && this.template.update) {
           this.template.update(this, dt)
         }
@@ -225,6 +293,7 @@ export class GameEngine {
       }
     }
 
+    this.renderParticles(ctx)
     this._drawHUD(ctx)
 
     if (this.state.status === 'won' || this.state.status === 'lost') {
@@ -255,7 +324,7 @@ export class GameEngine {
     ctx.textBaseline = 'middle'
     ctx.fillText(`Score: ${this.state.score}`, 12, 18)
 
-    if (this.state.lives > 0) {
+    if (this.state.lives > 0 && this.state.lives < 99) {
       ctx.textAlign = 'right'
       const hearts = '❤️'.repeat(Math.min(this.state.lives, 10))
       ctx.font = '14px serif'
@@ -271,18 +340,33 @@ export class GameEngine {
     ctx.textBaseline = 'middle'
 
     if (this.state.isWon) {
-      ctx.font = 'bold 48px sans-serif'
+      ctx.font = 'bold 52px sans-serif'
       ctx.fillStyle = '#ffd700'
+      ctx.shadowColor = '#ffa500'
+      ctx.shadowBlur = 20
       ctx.fillText('YOU WIN!', GAME_WIDTH / 2, GAME_HEIGHT / 2 - 30)
-      ctx.font = '32px serif'
+      ctx.shadowBlur = 0
+      ctx.font = '36px serif'
       ctx.fillText('🎉🏆🎉', GAME_WIDTH / 2, GAME_HEIGHT / 2 + 30)
     } else {
-      ctx.font = 'bold 48px sans-serif'
+      ctx.font = 'bold 52px sans-serif'
       ctx.fillStyle = '#ff6b6b'
+      ctx.shadowColor = '#ff0000'
+      ctx.shadowBlur = 15
       ctx.fillText('GAME OVER', GAME_WIDTH / 2, GAME_HEIGHT / 2 - 30)
-      ctx.font = '24px sans-serif'
+      ctx.shadowBlur = 0
+      ctx.font = '26px sans-serif'
       ctx.fillStyle = '#fff'
       ctx.fillText(`Score: ${this.state.score}`, GAME_WIDTH / 2, GAME_HEIGHT / 2 + 30)
     }
   }
+}
+
+export function moveTowardsMouse(entity, input, dt, smoothing = 0.12) {
+  if (input.pointer.down || input.pointer.x > 0) {
+    const targetX = input.pointer.x - entity.width / 2
+    entity.x += (targetX - entity.x) * smoothing
+  }
+  if (input.actions.left) entity.x -= entity.speed * dt * 60
+  if (input.actions.right) entity.x += entity.speed * dt * 60
 }

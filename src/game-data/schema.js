@@ -31,14 +31,14 @@ export function createGameDefinition(overrides = {}) {
     },
     player: {
       type: 'cat',
-      size: 50,
-      speed: 5,
+      size: 65,
+      speed: 6,
       ...(overrides.player || {}),
     },
     objects: overrides.objects || [],
     rules: {
-      startingLives: 3,
-      targetScore: 20,
+      startingLives: 5,
+      targetScore: 50,
       difficulty: 'normal',
       ...(overrides.rules || {}),
     },

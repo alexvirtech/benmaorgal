@@ -1,4 +1,4 @@
-# BenMaorgal — AI Game-Making Robot MVP
+# BenMaorGal — AI Game-Making Robot MVP
 
 A child-friendly browser game creation environment where kids aged 8-15 can create and modify games by chatting with a friendly robot.
 

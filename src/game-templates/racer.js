@@ -1,4 +1,4 @@
-import { GAME_WIDTH, GAME_HEIGHT } from '../game-sdk/engine.js'
+import { GAME_WIDTH, GAME_HEIGHT, moveTowardsMouse } from '../game-sdk/engine.js'
 import { checkAABB } from '../game-sdk/physics.js'
 import { getSprite } from '../game-data/schema.js'
 
@@ -24,23 +24,24 @@ export const racerTemplate = {
       template: 'racer',
       title: 'Road Racer',
       theme: { background: 'city' },
-      player: { type: 'car', size: 45, speed: 6 },
+      player: { type: 'car', size: 60, speed: 6 },
       objects: [
-        { id: 'traffic', role: 'hazard', type: 'barrel', speed: 3, spawnRate: 1000 },
+        { id: 'traffic', role: 'hazard', type: 'barrel', speed: 3, spawnRate: 900 },
       ],
-      rules: { startingLives: 3, targetScore: 50, difficulty: 'normal' },
+      rules: { startingLives: 5, targetScore: 100, difficulty: 'normal' },
     }
   },
 
   setup(engine, def) {
+    const size = def.player.size || 60
     engine.addEntity({
       role: 'player',
       type: def.player.type,
       sprite: getSprite(def.player.type),
-      x: GAME_WIDTH / 2 - def.player.size / 2,
-      y: GAME_HEIGHT - def.player.size - 30,
-      width: def.player.size,
-      height: def.player.size,
+      x: GAME_WIDTH / 2 - size / 2,
+      y: GAME_HEIGHT - size - 30,
+      width: size,
+      height: size,
       speed: def.player.speed,
     })
     engine.state.lives = def.rules.startingLives
@@ -48,6 +49,7 @@ export const racerTemplate = {
     engine.set('scoreTimer', 0)
     engine.set('roadOffset', 0)
     engine.set('gameSpeed', 1)
+    engine.set('targetScore', def.rules.targetScore)
   },
 
   update(engine, dt) {
@@ -55,8 +57,7 @@ export const racerTemplate = {
     const player = engine.getPlayer()
     if (!player) return
 
-    if (input.actions.left) player.x -= player.speed * dt * 60
-    if (input.actions.right) player.x += player.speed * dt * 60
+    moveTowardsMouse(player, input, dt, 0.15)
     if (player.x < ROAD_LEFT + 5) player.x = ROAD_LEFT + 5
     if (player.x + player.width > ROAD_RIGHT - 5) player.x = ROAD_RIGHT - player.width - 5
 
@@ -64,20 +65,21 @@ export const racerTemplate = {
     engine.set('roadOffset', (engine.get('roadOffset') + dt * 200 * gameSpeed) % 40)
 
     const def = engine.definition
-    const obs = def.objects[0] || { speed: 3, spawnRate: 1000, type: 'barrel' }
+    const obs = def.objects[0] || { speed: 3, spawnRate: 900, type: 'barrel' }
 
     const timer = (engine.get('spawnTimer') || 0) + dt * 1000
     if (timer >= obs.spawnRate) {
       engine.set('spawnTimer', 0)
       const lane = Math.floor(Math.random() * 3)
+      const size = 50
       engine.addEntity({
         role: 'hazard',
         type: obs.type,
         sprite: getSprite(obs.type),
-        x: ROAD_LEFT + lane * LANE_W + (LANE_W - 36) / 2,
-        y: -50,
-        width: 36,
-        height: 40,
+        x: ROAD_LEFT + lane * LANE_W + (LANE_W - size) / 2,
+        y: -60,
+        width: size,
+        height: 55,
         vy: obs.speed * gameSpeed,
       })
     } else {
@@ -89,7 +91,7 @@ export const racerTemplate = {
       engine.set('scoreTimer', 0)
       engine.addScore(1)
       if (engine.state.score % 15 === 0) {
-        engine.set('gameSpeed', (engine.get('gameSpeed') || 1) + 0.15)
+        engine.set('gameSpeed', (engine.get('gameSpeed') || 1) + 0.12)
       }
     } else {
       engine.set('scoreTimer', scoreTimer)
@@ -106,11 +108,13 @@ export const racerTemplate = {
       if (checkAABB(e, player)) {
         toRemove.push(e.id)
         engine.loseLife()
+        engine.spawnParticles(e.x + e.width / 2, e.y + e.height / 2, '#ff4400', 14, 4)
+        engine.spawnParticles(player.x + player.width / 2, player.y, '#ff0000', 8, 3)
       }
     }
     toRemove.forEach(id => engine.removeEntity(id))
 
-    if (engine.state.score >= (def.rules?.targetScore || 50)) {
+    if (engine.state.score >= engine.get('targetScore')) {
       engine.win()
     }
   },

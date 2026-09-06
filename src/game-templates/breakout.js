@@ -1,16 +1,16 @@
-import { GAME_WIDTH, GAME_HEIGHT } from '../game-sdk/engine.js'
+import { GAME_WIDTH, GAME_HEIGHT, moveTowardsMouse } from '../game-sdk/engine.js'
 import { drawBackground } from '../game-sdk/renderer.js'
 
-const PADDLE_W = 100
-const PADDLE_H = 12
-const BALL_SIZE = 12
-const BRICK_ROWS = 5
+const PADDLE_W = 140
+const PADDLE_H = 14
+const BALL_SIZE = 16
+const BRICK_ROWS = 6
 const BRICK_COLS = 10
 const BRICK_W = (GAME_WIDTH - 40) / BRICK_COLS
-const BRICK_H = 22
+const BRICK_H = 24
 const HUD_H = 40
 
-const BRICK_COLORS = ['#e74c3c', '#e67e22', '#f1c40f', '#2ecc71', '#3498db']
+const BRICK_COLORS = ['#e74c3c', '#e67e22', '#f1c40f', '#2ecc71', '#3498db', '#9b59b6']
 
 export const breakoutTemplate = {
   id: 'breakout',
@@ -32,7 +32,7 @@ export const breakoutTemplate = {
       theme: { background: 'night' },
       player: { type: 'paddle', size: PADDLE_W, speed: 7 },
       objects: [],
-      rules: { startingLives: 3, targetScore: BRICK_ROWS * BRICK_COLS, difficulty: 'normal' },
+      rules: { startingLives: 5, targetScore: BRICK_ROWS * BRICK_COLS, difficulty: 'normal' },
     }
   },
 
@@ -54,11 +54,11 @@ export const breakoutTemplate = {
       color: '#fff',
       shape: 'circle',
       x: GAME_WIDTH / 2 - BALL_SIZE / 2,
-      y: GAME_HEIGHT - 60,
+      y: GAME_HEIGHT - 70,
       width: BALL_SIZE,
       height: BALL_SIZE,
       vx: 3.5 * (Math.random() > 0.5 ? 1 : -1),
-      vy: -4.5,
+      vy: -5,
     })
 
     for (let row = 0; row < BRICK_ROWS; row++) {
@@ -86,8 +86,7 @@ export const breakoutTemplate = {
     if (!player || balls.length === 0) return
     const ball = balls[0]
 
-    if (input.actions.left) player.x -= player.speed * dt * 60
-    if (input.actions.right) player.x += player.speed * dt * 60
+    moveTowardsMouse(player, input, dt, 0.18)
     if (player.x < 0) player.x = 0
     if (player.x + player.width > GAME_WIDTH) player.x = GAME_WIDTH - player.width
 
@@ -108,14 +107,16 @@ export const breakoutTemplate = {
       ball.y = player.y - ball.height
       const hit = (ball.x + ball.width / 2 - player.x) / player.width
       ball.vx = (hit - 0.5) * 8
+      engine.spawnParticles(ball.x + ball.width / 2, player.y, '#ecf0f1', 5, 2)
     }
 
     if (ball.y > GAME_HEIGHT + 20) {
       engine.loseLife()
+      engine.spawnParticles(ball.x + ball.width / 2, GAME_HEIGHT, '#ff4444', 10, 3)
       ball.x = GAME_WIDTH / 2 - BALL_SIZE / 2
-      ball.y = GAME_HEIGHT - 60
+      ball.y = GAME_HEIGHT - 70
       ball.vx = 3.5 * (Math.random() > 0.5 ? 1 : -1)
-      ball.vy = -4.5
+      ball.vy = -5
     }
 
     const blocks = engine.getEntitiesByRole('block')
@@ -128,6 +129,8 @@ export const breakoutTemplate = {
       ) {
         engine.removeEntity(block.id)
         engine.addScore(block.points || 1)
+        engine.spawnParticles(block.x + block.width / 2, block.y + block.height / 2, block.color, 10, 3)
+        engine.spawnFloatingText(block.x + block.width / 2, block.y, `+${block.points || 1}`)
 
         const overlapLeft = ball.x + ball.width - block.x
         const overlapRight = block.x + block.width - ball.x
@@ -156,14 +159,17 @@ export const breakoutTemplate = {
       if (!e.active || !e.visible) continue
       ctx.fillStyle = e.color || '#fff'
       if (e.shape === 'circle') {
+        ctx.shadowColor = '#fff'
+        ctx.shadowBlur = 8
         ctx.beginPath()
         ctx.arc(e.x + e.width / 2, e.y + e.height / 2, e.width / 2, 0, Math.PI * 2)
         ctx.fill()
+        ctx.shadowBlur = 0
       } else if (e.role === 'block') {
         ctx.beginPath()
         ctx.roundRect(e.x, e.y, e.width, e.height, 4)
         ctx.fill()
-        ctx.strokeStyle = 'rgba(0,0,0,0.2)'
+        ctx.strokeStyle = 'rgba(255,255,255,0.25)'
         ctx.lineWidth = 1
         ctx.stroke()
       } else {

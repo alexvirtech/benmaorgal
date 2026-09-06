@@ -1,5 +1,5 @@
-import { GAME_WIDTH, GAME_HEIGHT } from '../game-sdk/engine.js'
-import { drawBackground, drawEntities } from '../game-sdk/renderer.js'
+import { GAME_WIDTH, GAME_HEIGHT, moveTowardsMouse } from '../game-sdk/engine.js'
+import { drawBackground, drawEntity } from '../game-sdk/renderer.js'
 import { checkAABB, clampToBounds } from '../game-sdk/physics.js'
 import { getSprite } from '../game-data/schema.js'
 
@@ -21,16 +21,16 @@ export const catchTemplate = {
       template: 'catch',
       title: 'Star Catcher',
       theme: { background: 'sky' },
-      player: { type: 'cat', size: 50, speed: 6 },
+      player: { type: 'cat', size: 70, speed: 6 },
       objects: [
-        { id: 'star', role: 'collectible', type: 'star', speed: 3, spawnRate: 1000, points: 1 },
+        { id: 'star', role: 'collectible', type: 'star', speed: 3, spawnRate: 900, points: 1 },
       ],
-      rules: { startingLives: 3, targetScore: 20, difficulty: 'normal' },
+      rules: { startingLives: 5, targetScore: 50, difficulty: 'normal' },
     }
   },
 
   setup(engine, def) {
-    const player = engine.addEntity({
+    engine.addEntity({
       role: 'player',
       type: def.player.type,
       sprite: getSprite(def.player.type),
@@ -40,14 +40,11 @@ export const catchTemplate = {
       height: def.player.size,
       speed: def.player.speed,
     })
-
     engine.state.lives = def.rules.startingLives
-    engine.set('targetScore', def.rules.targetScore)
-    engine.set('spawnTimers', {})
-
     for (const obj of def.objects) {
       engine.set(`timer_${obj.id}`, 0)
     }
+    engine.set('targetScore', def.rules.targetScore)
   },
 
   update(engine, dt) {
@@ -55,8 +52,7 @@ export const catchTemplate = {
     const player = engine.getPlayer()
     if (!player) return
 
-    if (input.actions.left) player.x -= player.speed * dt * 60
-    if (input.actions.right) player.x += player.speed * dt * 60
+    moveTowardsMouse(player, input, dt)
     clampToBounds(player, 40)
 
     const def = engine.definition
@@ -65,15 +61,16 @@ export const catchTemplate = {
       const timer = (engine.get(timerKey) || 0) + dt * 1000
       if (timer >= obj.spawnRate) {
         engine.set(timerKey, 0)
+        const size = 48
         engine.addEntity({
           role: obj.role,
           type: obj.type,
           sprite: getSprite(obj.type),
-          x: Math.random() * (GAME_WIDTH - 40),
-          y: -40,
-          width: 36,
-          height: 36,
-          vy: obj.speed,
+          x: Math.random() * (GAME_WIDTH - size),
+          y: -size,
+          width: size,
+          height: size,
+          vy: obj.speed + Math.random() * 0.5,
           points: obj.points || 1,
         })
       } else {
@@ -89,6 +86,7 @@ export const catchTemplate = {
         toRemove.push(e.id)
         if (e.role === 'collectible') {
           engine.loseLife()
+          engine.spawnParticles(e.x + e.width / 2, GAME_HEIGHT, '#ff4444', 6, 2)
         }
         continue
       }
@@ -96,8 +94,11 @@ export const catchTemplate = {
         toRemove.push(e.id)
         if (e.role === 'collectible') {
           engine.addScore(e.points || 1)
+          engine.spawnParticles(e.x + e.width / 2, e.y + e.height / 2, '#ffd700', 10, 3)
+          engine.spawnFloatingText(e.x + e.width / 2, e.y, `+${e.points || 1}`)
         } else if (e.role === 'hazard') {
           engine.loseLife()
+          engine.spawnParticles(player.x + player.width / 2, player.y, '#ff0000', 12, 4)
         }
       }
     }
@@ -110,6 +111,8 @@ export const catchTemplate = {
 
   render(engine, ctx) {
     drawBackground(ctx, engine.definition?.theme?.background || 'sky')
-    drawEntities(ctx, engine.entities)
+    for (const e of engine.entities.values()) {
+      if (e.active && e.visible) drawEntity(ctx, e)
+    }
   },
 }

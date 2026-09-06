@@ -1,5 +1,5 @@
-import { GAME_WIDTH, GAME_HEIGHT } from '../game-sdk/engine.js'
-import { drawBackground, drawEntities } from '../game-sdk/renderer.js'
+import { GAME_WIDTH, GAME_HEIGHT, moveTowardsMouse } from '../game-sdk/engine.js'
+import { drawBackground, drawEntity } from '../game-sdk/renderer.js'
 import { checkAABB, clampToBounds } from '../game-sdk/physics.js'
 import { getSprite } from '../game-data/schema.js'
 
@@ -21,11 +21,11 @@ export const shooterTemplate = {
       template: 'shooter',
       title: 'Space Shooter',
       theme: { background: 'space' },
-      player: { type: 'spaceship', size: 48, speed: 6 },
+      player: { type: 'spaceship', size: 65, speed: 6 },
       objects: [
-        { id: 'alien', role: 'enemy', type: 'alien', speed: 2, spawnRate: 1200, points: 1 },
+        { id: 'alien', role: 'enemy', type: 'alien', speed: 2, spawnRate: 1100, points: 1 },
       ],
-      rules: { startingLives: 3, targetScore: 30, difficulty: 'normal' },
+      rules: { startingLives: 5, targetScore: 60, difficulty: 'normal' },
     }
   },
 
@@ -51,41 +51,43 @@ export const shooterTemplate = {
     const player = engine.getPlayer()
     if (!player) return
 
-    if (input.actions.left) player.x -= player.speed * dt * 60
-    if (input.actions.right) player.x += player.speed * dt * 60
+    moveTowardsMouse(player, input, dt)
     clampToBounds(player, 40)
 
     const fireTimer = (engine.get('fireTimer') || 0) + dt
-    if (input.actions.fire && fireTimer > 0.25) {
+    const shouldFire = input.actions.fire || input.pointer.down
+    if (shouldFire && fireTimer > 0.22) {
       engine.set('fireTimer', 0)
       engine.addEntity({
         role: 'projectile',
         type: 'bullet',
         color: '#ffdd00',
-        x: player.x + player.width / 2 - 3,
-        y: player.y - 12,
-        width: 6,
-        height: 12,
-        vy: -10,
+        x: player.x + player.width / 2 - 4,
+        y: player.y - 14,
+        width: 8,
+        height: 14,
+        vy: -12,
       })
+      engine.spawnParticles(player.x + player.width / 2, player.y, '#ffaa00', 3, 1)
     } else {
       engine.set('fireTimer', fireTimer)
     }
 
     const def = engine.definition
-    const enemyDef = def.objects.find(o => o.role === 'enemy') || def.objects[0] || { speed: 2, spawnRate: 1200, type: 'alien' }
+    const enemyDef = def.objects.find(o => o.role === 'enemy') || def.objects[0] || { speed: 2, spawnRate: 1100, type: 'alien' }
 
     const timer = (engine.get('spawnTimer') || 0) + dt * 1000
     if (timer >= enemyDef.spawnRate) {
       engine.set('spawnTimer', 0)
+      const size = 52
       engine.addEntity({
         role: 'enemy',
         type: enemyDef.type,
         sprite: getSprite(enemyDef.type),
-        x: Math.random() * (GAME_WIDTH - 40),
-        y: -40,
-        width: 38,
-        height: 38,
+        x: Math.random() * (GAME_WIDTH - size),
+        y: -size,
+        width: size,
+        height: size,
         vy: enemyDef.speed,
         points: enemyDef.points || 1,
       })
@@ -93,43 +95,49 @@ export const shooterTemplate = {
       engine.set('spawnTimer', timer)
     }
 
-    const toRemove = []
+    const toRemove = new Set()
     const projectiles = engine.getEntitiesByRole('projectile')
     const enemies = engine.getEntitiesByRole('enemy')
     const hazards = engine.getEntitiesByRole('hazard')
 
     for (const p of projectiles) {
       p.y += p.vy * dt * 60
-      if (p.y < -20) { toRemove.push(p.id); continue }
+      if (p.y < -20) { toRemove.add(p.id); continue }
       for (const e of enemies) {
+        if (toRemove.has(e.id)) continue
         if (checkAABB(p, e)) {
-          toRemove.push(p.id)
-          toRemove.push(e.id)
+          toRemove.add(p.id)
+          toRemove.add(e.id)
           engine.addScore(e.points || 1)
+          engine.spawnParticles(e.x + e.width / 2, e.y + e.height / 2, '#ff6600', 12, 4)
+          engine.spawnFloatingText(e.x + e.width / 2, e.y, `+${e.points || 1}`)
           break
         }
       }
     }
 
     for (const e of enemies) {
+      if (toRemove.has(e.id)) continue
       e.y += e.vy * dt * 60
-      if (e.y > GAME_HEIGHT + 50) { toRemove.push(e.id); continue }
+      if (e.y > GAME_HEIGHT + 50) { toRemove.add(e.id); continue }
       if (checkAABB(e, player)) {
-        toRemove.push(e.id)
+        toRemove.add(e.id)
         engine.loseLife()
+        engine.spawnParticles(player.x + player.width / 2, player.y, '#ff0000', 10, 3)
       }
     }
 
     for (const h of hazards) {
       h.y += (h.vy || 3) * dt * 60
-      if (h.y > GAME_HEIGHT + 50) { toRemove.push(h.id); continue }
+      if (h.y > GAME_HEIGHT + 50) { toRemove.add(h.id); continue }
       if (checkAABB(h, player)) {
-        toRemove.push(h.id)
+        toRemove.add(h.id)
         engine.loseLife()
+        engine.spawnParticles(player.x + player.width / 2, player.y, '#ff0000', 10, 3)
       }
     }
 
-    new Set(toRemove).forEach(id => engine.removeEntity(id))
+    toRemove.forEach(id => engine.removeEntity(id))
 
     if (engine.state.score >= engine.get('targetScore')) {
       engine.win()
@@ -138,6 +146,17 @@ export const shooterTemplate = {
 
   render(engine, ctx) {
     drawBackground(ctx, engine.definition?.theme?.background || 'space')
-    drawEntities(ctx, engine.entities)
+    for (const e of engine.entities.values()) {
+      if (!e.active || !e.visible) continue
+      if (e.role === 'projectile') {
+        ctx.fillStyle = e.color || '#ffdd00'
+        ctx.shadowColor = '#ffdd00'
+        ctx.shadowBlur = 8
+        ctx.fillRect(e.x, e.y, e.width, e.height)
+        ctx.shadowBlur = 0
+      } else {
+        drawEntity(ctx, e)
+      }
+    }
   },
 }

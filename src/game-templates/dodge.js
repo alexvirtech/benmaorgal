@@ -1,5 +1,5 @@
-import { GAME_WIDTH, GAME_HEIGHT } from '../game-sdk/engine.js'
-import { drawBackground, drawEntities } from '../game-sdk/renderer.js'
+import { GAME_WIDTH, GAME_HEIGHT, moveTowardsMouse } from '../game-sdk/engine.js'
+import { drawBackground, drawEntity } from '../game-sdk/renderer.js'
 import { checkAABB, clampToBounds } from '../game-sdk/physics.js'
 import { getSprite } from '../game-data/schema.js'
 
@@ -21,11 +21,11 @@ export const dodgeTemplate = {
       template: 'dodge',
       title: 'Bomb Dodger',
       theme: { background: 'city' },
-      player: { type: 'hero', size: 45, speed: 6 },
+      player: { type: 'hero', size: 65, speed: 6 },
       objects: [
         { id: 'bomb', role: 'hazard', type: 'bomb', speed: 3.5, spawnRate: 800, effect: 'loseLife' },
       ],
-      rules: { startingLives: 3, targetScore: 100, difficulty: 'normal' },
+      rules: { startingLives: 5, targetScore: 200, difficulty: 'normal' },
     }
   },
 
@@ -43,6 +43,7 @@ export const dodgeTemplate = {
     engine.state.lives = def.rules.startingLives
     engine.set('spawnTimer', 0)
     engine.set('scoreTimer', 0)
+    engine.set('targetScore', def.rules.targetScore)
   },
 
   update(engine, dt) {
@@ -50,8 +51,7 @@ export const dodgeTemplate = {
     const player = engine.getPlayer()
     if (!player) return
 
-    if (input.actions.left) player.x -= player.speed * dt * 60
-    if (input.actions.right) player.x += player.speed * dt * 60
+    moveTowardsMouse(player, input, dt)
     clampToBounds(player, 40)
 
     const def = engine.definition
@@ -60,14 +60,15 @@ export const dodgeTemplate = {
     const timer = (engine.get('spawnTimer') || 0) + dt * 1000
     if (timer >= hazard.spawnRate) {
       engine.set('spawnTimer', 0)
+      const size = 48
       engine.addEntity({
         role: 'hazard',
         type: hazard.type,
         sprite: getSprite(hazard.type),
-        x: Math.random() * (GAME_WIDTH - 36),
-        y: -40,
-        width: 36,
-        height: 36,
+        x: Math.random() * (GAME_WIDTH - size),
+        y: -size,
+        width: size,
+        height: size,
         vy: hazard.speed + Math.random() * 1.5,
       })
     } else {
@@ -93,13 +94,21 @@ export const dodgeTemplate = {
       if (checkAABB(e, player)) {
         toRemove.push(e.id)
         engine.loseLife()
+        engine.spawnParticles(e.x + e.width / 2, e.y + e.height / 2, '#ff4400', 14, 4)
+        engine.spawnParticles(player.x + player.width / 2, player.y, '#ff0000', 8, 2)
       }
     }
     toRemove.forEach(id => engine.removeEntity(id))
+
+    if (engine.state.score >= engine.get('targetScore')) {
+      engine.win()
+    }
   },
 
   render(engine, ctx) {
     drawBackground(ctx, engine.definition?.theme?.background || 'city')
-    drawEntities(ctx, engine.entities)
+    for (const e of engine.entities.values()) {
+      if (e.active && e.visible) drawEntity(ctx, e)
+    }
   },
 }

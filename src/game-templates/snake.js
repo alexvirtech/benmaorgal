@@ -2,7 +2,7 @@ import { GAME_WIDTH, GAME_HEIGHT } from '../game-sdk/engine.js'
 import { drawBackground } from '../game-sdk/renderer.js'
 import { getSprite } from '../game-data/schema.js'
 
-const CELL = 20
+const CELL = 24
 const COLS = Math.floor(GAME_WIDTH / CELL)
 const ROWS = Math.floor((GAME_HEIGHT - 40) / CELL)
 const HUD_H = 40
@@ -29,7 +29,7 @@ export const snakeTemplate = {
       objects: [
         { id: 'food', role: 'collectible', type: 'apple', points: 1 },
       ],
-      rules: { startingLives: 1, targetScore: 20, difficulty: 'normal' },
+      rules: { startingLives: 1, targetScore: 40, difficulty: 'normal' },
     }
   },
 
@@ -47,13 +47,12 @@ export const snakeTemplate = {
     engine.set('moveInterval', 0.12)
     engine.state.lives = def.rules.startingLives
     engine.set('targetScore', def.rules.targetScore)
-    placeFood(engine, def)
+    placeFood(engine)
   },
 
   update(engine, dt) {
     const input = engine.input
     const dir = engine.get('dir')
-    const nextDir = engine.get('nextDir')
 
     if (input.actions.left && dir.x !== 1) engine.set('nextDir', { x: -1, y: 0 })
     else if (input.actions.right && dir.x !== -1) engine.set('nextDir', { x: 1, y: 0 })
@@ -75,12 +74,22 @@ export const snakeTemplate = {
     const head = { x: snake[0].x + d.x, y: snake[0].y + d.y }
 
     if (head.x < 0 || head.x >= COLS || head.y < 0 || head.y >= ROWS) {
+      engine.spawnParticles(
+        snake[0].x * CELL + CELL / 2,
+        HUD_H + snake[0].y * CELL + CELL / 2,
+        '#ff4444', 14, 4
+      )
       engine.lose()
       return
     }
 
     for (const seg of snake) {
       if (seg.x === head.x && seg.y === head.y) {
+        engine.spawnParticles(
+          head.x * CELL + CELL / 2,
+          HUD_H + head.y * CELL + CELL / 2,
+          '#ff4444', 14, 4
+        )
         engine.lose()
         return
       }
@@ -91,7 +100,17 @@ export const snakeTemplate = {
     const food = engine.get('food')
     if (food && head.x === food.x && head.y === food.y) {
       engine.addScore(1)
-      placeFood(engine, engine.definition)
+      engine.spawnParticles(
+        food.x * CELL + CELL / 2,
+        HUD_H + food.y * CELL + CELL / 2,
+        '#ffd700', 10, 3
+      )
+      engine.spawnFloatingText(
+        food.x * CELL + CELL / 2,
+        HUD_H + food.y * CELL,
+        '+1'
+      )
+      placeFood(engine)
       const newInterval = Math.max(0.05, engine.get('moveInterval') - 0.003)
       engine.set('moveInterval', newInterval)
     } else {
@@ -115,13 +134,13 @@ export const snakeTemplate = {
       const brightness = i === 0 ? '#27ae60' : '#2ecc71'
       ctx.fillStyle = brightness
       ctx.beginPath()
-      ctx.roundRect(seg.x * CELL + 1, HUD_H + seg.y * CELL + 1, CELL - 2, CELL - 2, 4)
+      ctx.roundRect(seg.x * CELL + 1, HUD_H + seg.y * CELL + 1, CELL - 2, CELL - 2, 5)
       ctx.fill()
     }
 
     if (snake.length > 0) {
       const head = snake[0]
-      ctx.font = `${CELL * 0.7}px serif`
+      ctx.font = `${CELL * 0.75}px serif`
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'
       ctx.fillText('🐍', head.x * CELL + CELL / 2, HUD_H + head.y * CELL + CELL / 2)
@@ -131,7 +150,7 @@ export const snakeTemplate = {
     if (food) {
       const foodObj = engine.definition?.objects?.[0]
       const sprite = getSprite(foodObj?.type || 'apple')
-      ctx.font = `${CELL * 0.8}px serif`
+      ctx.font = `${CELL * 0.85}px serif`
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'
       ctx.fillText(sprite, food.x * CELL + CELL / 2, HUD_H + food.y * CELL + CELL / 2)
@@ -139,7 +158,7 @@ export const snakeTemplate = {
   },
 }
 
-function placeFood(engine, def) {
+function placeFood(engine) {
   const snake = engine.get('snake') || []
   let x, y, attempts = 0
   do {

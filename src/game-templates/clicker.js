@@ -23,21 +23,21 @@ export const clickerTemplate = {
       objects: [
         { id: 'target', role: 'enemy', type: 'monster', speed: 1, spawnRate: 1500, points: 1 },
       ],
-      rules: { startingLives: 3, targetScore: 25, difficulty: 'normal', gameDuration: 30 },
+      rules: { startingLives: 5, targetScore: 50, difficulty: 'normal', gameDuration: 60 },
     }
   },
 
   setup(engine, def) {
     engine.state.lives = def.rules.startingLives
     engine.set('targetScore', def.rules.targetScore)
-    engine.set('timeLeft', def.rules.gameDuration || 30)
+    engine.set('timeLeft', def.rules.gameDuration || 60)
     engine.set('currentTarget', null)
     engine.set('targetTimer', 0)
     engine.set('targetDuration', 2.0)
     engine.set('spawnDelay', 0.3)
     engine.set('spawnTimer', 0)
     engine.set('combo', 0)
-    spawnTarget(engine, def)
+    spawnTarget(engine)
   },
 
   update(engine, dt) {
@@ -58,7 +58,7 @@ export const clickerTemplate = {
     if (!target) {
       const spawnTimer = (engine.get('spawnTimer') || 0) + dt
       if (spawnTimer >= engine.get('spawnDelay')) {
-        spawnTarget(engine, engine.definition)
+        spawnTarget(engine)
         engine.set('spawnTimer', 0)
       } else {
         engine.set('spawnTimer', spawnTimer)
@@ -70,6 +70,9 @@ export const clickerTemplate = {
     engine.set('targetTimer', targetTimer)
 
     if (targetTimer >= engine.get('targetDuration')) {
+      engine.spawnParticles(
+        target.x + target.size / 2, target.y + target.size / 2, '#888888', 8, 3
+      )
       engine.set('currentTarget', null)
       engine.set('targetTimer', 0)
       engine.set('combo', 0)
@@ -84,11 +87,18 @@ export const clickerTemplate = {
           py >= target.y && py <= target.y + target.size) {
         const combo = (engine.get('combo') || 0) + 1
         engine.set('combo', combo)
-        engine.addScore(1 + Math.floor(combo / 5))
+        const points = 1 + Math.floor(combo / 5)
+        engine.addScore(points)
+        engine.spawnParticles(
+          target.x + target.size / 2, target.y + target.size / 2, '#ffd700', 12, 4
+        )
+        engine.spawnFloatingText(
+          target.x + target.size / 2, target.y, `+${points}`
+        )
         engine.set('currentTarget', null)
         engine.set('targetTimer', 0)
 
-        const dur = Math.max(0.6, engine.get('targetDuration') - 0.05)
+        const dur = Math.max(0.6, engine.get('targetDuration') - 0.04)
         engine.set('targetDuration', dur)
       }
     }
@@ -104,7 +114,7 @@ export const clickerTemplate = {
     ctx.font = 'bold 16px sans-serif'
     ctx.textAlign = 'left'
     ctx.textBaseline = 'middle'
-    ctx.fillText(`Score: ${engine.state.score}`, 12, 20)
+    ctx.fillText(`Score: ${engine.state.score} / ${engine.get('targetScore')}`, 12, 20)
     ctx.textAlign = 'center'
     ctx.fillText(`⏱ ${Math.ceil(timeLeft)}s`, GAME_WIDTH / 2, 20)
     ctx.textAlign = 'right'
@@ -118,9 +128,9 @@ export const clickerTemplate = {
       const pct = 1 - targetTimer / duration
 
       ctx.save()
-      const scale = 0.8 + Math.sin(targetTimer * 8) * 0.05
+      const pulse = 0.85 + Math.sin(targetTimer * 8) * 0.08
       ctx.translate(target.x + target.size / 2, target.y + target.size / 2)
-      ctx.scale(scale, scale)
+      ctx.scale(pulse, pulse)
 
       ctx.fillStyle = `rgba(255,100,100,${0.2 + pct * 0.3})`
       ctx.beginPath()
@@ -136,18 +146,23 @@ export const clickerTemplate = {
 
       ctx.restore()
 
-      ctx.fillStyle = '#e74c3c'
+      ctx.fillStyle = pct > 0.3 ? '#e74c3c' : '#ff0000'
       const barW = target.size
-      const barH = 6
-      ctx.fillRect(target.x, target.y + target.size + 8, barW * pct, barH)
+      const barH = 8
+      ctx.beginPath()
+      ctx.roundRect(target.x, target.y + target.size + 10, barW * pct, barH, 3)
+      ctx.fill()
       ctx.strokeStyle = 'rgba(255,255,255,0.5)'
-      ctx.strokeRect(target.x, target.y + target.size + 8, barW, barH)
+      ctx.lineWidth = 1
+      ctx.beginPath()
+      ctx.roundRect(target.x, target.y + target.size + 10, barW, barH, 3)
+      ctx.stroke()
     }
   },
 }
 
-function spawnTarget(engine, def) {
-  const size = 60 + Math.random() * 20
+function spawnTarget(engine) {
+  const size = 70 + Math.random() * 25
   const margin = 60
   engine.set('currentTarget', {
     x: margin + Math.random() * (GAME_WIDTH - size - margin * 2),

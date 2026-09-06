@@ -22,12 +22,12 @@ export const memoryTemplate = {
       theme: { background: 'sky' },
       player: { type: 'hero', size: 50, speed: 5 },
       objects: [],
-      rules: { startingLives: 99, targetScore: 8, difficulty: 'normal', pairs: 8 },
+      rules: { startingLives: 99, targetScore: 10, difficulty: 'normal', pairs: 10 },
     }
   },
 
   setup(engine, def) {
-    const pairs = Math.min(def.rules?.pairs || 8, CARD_EMOJIS.length)
+    const pairs = Math.min(def.rules?.pairs || 10, CARD_EMOJIS.length)
     const emojis = CARD_EMOJIS.slice(0, pairs)
     const deck = [...emojis, ...emojis]
 
@@ -36,11 +36,11 @@ export const memoryTemplate = {
       [deck[i], deck[j]] = [deck[j], deck[i]]
     }
 
-    const cols = pairs <= 4 ? 4 : pairs <= 6 ? 4 : 4
+    const cols = pairs <= 4 ? 4 : pairs <= 6 ? 4 : 5
     const rows = Math.ceil(deck.length / cols)
-    const cardW = Math.min(90, (GAME_WIDTH - 80) / cols)
-    const cardH = Math.min(100, (GAME_HEIGHT - 120) / rows)
-    const startX = (GAME_WIDTH - cols * (cardW + 10)) / 2
+    const cardW = Math.min(110, (GAME_WIDTH - 80) / cols)
+    const cardH = Math.min(120, (GAME_HEIGHT - 120) / rows)
+    const startX = (GAME_WIDTH - cols * (cardW + 12)) / 2
     const startY = 60
 
     engine.set('cards', deck.map((emoji, i) => ({
@@ -48,12 +48,13 @@ export const memoryTemplate = {
       emoji,
       col: i % cols,
       row: Math.floor(i / cols),
-      x: startX + (i % cols) * (cardW + 10),
-      y: startY + Math.floor(i / cols) * (cardH + 10),
+      x: startX + (i % cols) * (cardW + 12),
+      y: startY + Math.floor(i / cols) * (cardH + 12),
       w: cardW,
       h: cardH,
       revealed: false,
       matched: false,
+      matchAnim: 0,
     })))
 
     engine.set('selected', [])
@@ -65,12 +66,18 @@ export const memoryTemplate = {
   },
 
   update(engine, dt) {
+    const cards = engine.get('cards')
+    for (const card of cards) {
+      if (card.matchAnim > 0) {
+        card.matchAnim = Math.max(0, card.matchAnim - dt * 2)
+      }
+    }
+
     const lockTimer = engine.get('lockTimer') || 0
     if (lockTimer > 0) {
       const remaining = lockTimer - dt
       if (remaining <= 0) {
         engine.set('lockTimer', 0)
-        const cards = engine.get('cards')
         const selected = engine.get('selected')
         if (selected.length === 2) {
           const [a, b] = selected
@@ -89,7 +96,6 @@ export const memoryTemplate = {
     const input = engine.input
     if (!input.pointer.clicked) return
 
-    const cards = engine.get('cards')
     const selected = engine.get('selected')
     const px = input.pointer.x
     const py = input.pointer.y
@@ -106,7 +112,20 @@ export const memoryTemplate = {
           if (cards[a].emoji === cards[b].emoji) {
             cards[a].matched = true
             cards[b].matched = true
+            cards[a].matchAnim = 1
+            cards[b].matchAnim = 1
             engine.addScore(1)
+            engine.spawnParticles(
+              cards[a].x + cards[a].w / 2, cards[a].y + cards[a].h / 2, '#2ecc71', 8, 3
+            )
+            engine.spawnParticles(
+              cards[b].x + cards[b].w / 2, cards[b].y + cards[b].h / 2, '#2ecc71', 8, 3
+            )
+            engine.spawnFloatingText(
+              (cards[a].x + cards[b].x) / 2 + cards[a].w / 2,
+              (cards[a].y + cards[b].y) / 2,
+              'Match!'
+            )
             engine.set('selected', [])
             if (engine.state.score >= engine.get('targetPairs')) {
               engine.win()
@@ -125,46 +144,51 @@ export const memoryTemplate = {
 
     const cards = engine.get('cards') || []
     for (const card of cards) {
+      const scale = 1 + card.matchAnim * 0.15
+
+      ctx.save()
+      ctx.translate(card.x + card.w / 2, card.y + card.h / 2)
+      ctx.scale(scale, scale)
+
       if (card.matched) {
         ctx.fillStyle = 'rgba(46, 204, 113, 0.3)'
         ctx.beginPath()
-        ctx.roundRect(card.x, card.y, card.w, card.h, 10)
+        ctx.roundRect(-card.w / 2, -card.h / 2, card.w, card.h, 10)
         ctx.fill()
         ctx.font = `${card.w * 0.5}px serif`
         ctx.textAlign = 'center'
         ctx.textBaseline = 'middle'
         ctx.globalAlpha = 0.5
-        ctx.fillText(card.emoji, card.x + card.w / 2, card.y + card.h / 2)
+        ctx.fillText(card.emoji, 0, 0)
         ctx.globalAlpha = 1
-        continue
-      }
-
-      if (card.revealed) {
+      } else if (card.revealed) {
         ctx.fillStyle = '#fff'
         ctx.beginPath()
-        ctx.roundRect(card.x, card.y, card.w, card.h, 10)
+        ctx.roundRect(-card.w / 2, -card.h / 2, card.w, card.h, 10)
         ctx.fill()
         ctx.strokeStyle = '#6c5ce7'
-        ctx.lineWidth = 2
+        ctx.lineWidth = 3
         ctx.stroke()
         ctx.font = `${card.w * 0.5}px serif`
         ctx.textAlign = 'center'
         ctx.textBaseline = 'middle'
-        ctx.fillText(card.emoji, card.x + card.w / 2, card.y + card.h / 2)
+        ctx.fillText(card.emoji, 0, 0)
       } else {
-        const grad = ctx.createLinearGradient(card.x, card.y, card.x, card.y + card.h)
+        const grad = ctx.createLinearGradient(0, -card.h / 2, 0, card.h / 2)
         grad.addColorStop(0, '#6c5ce7')
         grad.addColorStop(1, '#a29bfe')
         ctx.fillStyle = grad
         ctx.beginPath()
-        ctx.roundRect(card.x, card.y, card.w, card.h, 10)
+        ctx.roundRect(-card.w / 2, -card.h / 2, card.w, card.h, 10)
         ctx.fill()
         ctx.fillStyle = 'rgba(255,255,255,0.3)'
-        ctx.font = `${card.w * 0.35}px serif`
+        ctx.font = `${card.w * 0.4}px serif`
         ctx.textAlign = 'center'
         ctx.textBaseline = 'middle'
-        ctx.fillText('?', card.x + card.w / 2, card.y + card.h / 2)
+        ctx.fillText('?', 0, 0)
       }
+
+      ctx.restore()
     }
 
     const attempts = engine.get('attempts') || 0

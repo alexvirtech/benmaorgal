@@ -1,7 +1,7 @@
 import './globals.css'
 
 export const metadata = {
-  title: 'BenMaorgal - Build Your Own Game!',
+  title: 'BenMaorGal - Build Your Own Game!',
   description: 'Talk to a game-making robot and create your own games!',
 }
 
