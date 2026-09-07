@@ -78,9 +78,14 @@ export default function RobotChat({ messages, suggestions, onSend, disabled }) {
   const enSpeech = useSpeechRecognition('en-US', handleEnglishResult)
   const heSpeech = useSpeechRecognition('he-IL', handleHebrewResult)
 
-  const handleSend = () => {
-    const text = input.trim()
+  const handleSend = async () => {
+    let text = input.trim()
     if (!text) return
+    if (/[֐-׿]/.test(text)) {
+      setTranslating(true)
+      text = await translateHebrewToEnglish(text)
+      setTranslating(false)
+    }
     onSend(text)
     setInput('')
   }

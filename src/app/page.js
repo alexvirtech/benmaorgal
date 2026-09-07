@@ -80,14 +80,20 @@ export default function HomePage() {
   const enSpeech = useSpeechRecognition('en-US', handleEnglishResult)
   const heSpeech = useSpeechRecognition('he-IL', handleHebrewResult)
 
-  const handleCreate = (prompt) => {
+  const handleCreate = async (prompt) => {
     if (creating) return
+    let text = prompt || input
+    if (/[֐-׿]/.test(text)) {
+      setTranslating(true)
+      text = await translateHebrewToEnglish(text)
+      setTranslating(false)
+    }
     setCreating(true)
 
-    const result = interpretPrompt(prompt || input)
+    const result = interpretPrompt(text)
     if (result.intent === 'CREATE_GAME' && result.definition) {
       const game = createGame(result.definition, [
-        { id: 1, role: 'user', text: prompt || input, timestamp: Date.now() },
+        { id: 1, role: 'user', text, timestamp: Date.now() },
         { id: 2, role: 'robot', text: result.robotMessage, timestamp: Date.now() },
       ])
       router.push(`/games/${game.id}`)
