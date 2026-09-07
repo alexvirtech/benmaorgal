@@ -136,7 +136,7 @@ export default function VoicePrompt({ placeholder, busy, onSubmit, suggestions }
   const disabled = busy || translating
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', padding: '12px 16px' }}>
       {hebrewTranscript && (
         <div style={{
           direction: 'rtl',
@@ -182,7 +182,7 @@ export default function VoicePrompt({ placeholder, busy, onSubmit, suggestions }
         onKeyDown={handleKeyDown}
         placeholder={placeholder || t('chat.placeholder')}
         disabled={disabled}
-        dir="ltr"
+        dir="rtl"
         rows={2}
         style={{
           width: '100%',
