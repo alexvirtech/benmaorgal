@@ -10,10 +10,10 @@ export const catchTemplate = {
   description: 'Catch falling objects',
   examplePrompt: 'Make a cat catch stars',
   suggestions: [
-    { text: 'Make me faster', icon: '💨' },
-    { text: 'Add bombs', icon: '💣' },
-    { text: 'Give me 5 lives', icon: '❤️' },
-    { text: 'Make the background space', icon: '🌌' },
+    { he: 'תעשה אותי מהר יותר', en: 'make the player faster', icon: '💨' },
+    { he: 'תוסיף פצצות', en: 'add bombs', icon: '💣' },
+    { he: 'תן לי 5 חיים', en: 'give me 5 lives', icon: '❤️' },
+    { he: 'רקע של חלל', en: 'make the background space', icon: '🌌' },
   ],
 
   getDefaultDefinition() {

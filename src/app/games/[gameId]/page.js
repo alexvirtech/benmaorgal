@@ -8,12 +8,14 @@ import GameControls from '@/components/games/GameControls'
 import { GameEngine, GAME_WIDTH, GAME_HEIGHT } from '@/game-sdk/engine'
 import { InputManager } from '@/game-sdk/input'
 import { getTemplate, getTemplateMetadata } from '@/game-templates/index'
-import { interpretPrompt } from '@/game-interpreter/LocalGameInterpreter'
-import { getGame, saveGame } from '@/repositories/localGameRepository'
+import { routePrompt } from '@/ai/BrainRouter'
+import { getGame, saveGame, getDisplayTitle } from '@/repositories/localGameRepository'
+import { useLang } from '@/i18n'
 
 export default function GameWorkspacePage() {
   const { gameId } = useParams()
   const router = useRouter()
+  const { t, lang } = useLang()
   const [game, setGame] = useState(null)
   const [gameState, setGameState] = useState(null)
   const [messages, setMessages] = useState([])
@@ -24,6 +26,7 @@ export default function GameWorkspacePage() {
   const [editingTitle, setEditingTitle] = useState(false)
   const [chatOpen, setChatOpen] = useState(true)
   const [isMobile, setIsMobile] = useState(false)
+  const [busy, setBusy] = useState(false)
 
   const canvasRef = useRef(null)
   const engineRef = useRef(null)
@@ -54,7 +57,7 @@ export default function GameWorkspacePage() {
     setGame(g)
     gameRef.current = g
     setMessages(g.messages || [])
-    setTitle(g.title || '')
+    setTitle(getDisplayTitle(g.title))
     const meta = getTemplateMetadata(g.template)
     setSuggestions(meta?.suggestions || [])
     setLoaded(true)
@@ -92,15 +95,9 @@ export default function GameWorkspacePage() {
     engine.setDefinition(def)
     engine.setTemplate(template)
     engine.state.lives = def.rules?.startingLives || 3
+    engine.onStateChange = (s) => setGameState(s)
 
     template.setup(engine, def)
-
-    const origUpdate = template.update
-    template.update = (eng, dt) => {
-      input.update()
-      origUpdate.call(template, eng, dt)
-      setGameState({ ...eng.state })
-    }
 
     engineRef.current = engine
     inputRef.current = input
@@ -133,22 +130,49 @@ export default function GameWorkspacePage() {
     setTimeout(() => setSaved(false), 1500)
   }, [])
 
-  const handleSend = useCallback((text) => {
+  const handleSend = useCallback(async (english, hebrew) => {
     const currentGame = gameRef.current
-    if (!currentGame) return
+    if (!currentGame || busy) return
 
-    const userMsg = { id: Date.now(), role: 'user', text, timestamp: Date.now() }
+    setBusy(true)
+
+    const userMsg = {
+      id: Date.now(),
+      role: 'user',
+      text: english,
+      textHe: hebrew || null,
+      lang: hebrew ? 'he' : 'en',
+      timestamp: Date.now(),
+    }
     const newMessages = [...(currentGame.messages || []), userMsg]
+    setMessages(newMessages)
 
-    const result = interpretPrompt(text, currentGame)
-    const robotMsg = { id: Date.now() + 1, role: 'robot', text: result.robotMessage, timestamp: Date.now() }
+    let result
+    try {
+      result = await routePrompt(english, currentGame, 'modify')
+    } catch {
+      result = {
+        intent: 'UNKNOWN',
+        robotMessage: t('robot.offline'),
+        robotMessageHe: t('robot.offline'),
+      }
+    }
+
+    const robotMsg = {
+      id: Date.now() + 1,
+      role: 'robot',
+      text: result.robotMessage,
+      textHe: result.robotMessageHe || result.robotMessage,
+      timestamp: Date.now(),
+    }
     newMessages.push(robotMsg)
 
     if (result.intent === 'MODIFY_GAME' && result.definition) {
       const historyEntry = {
         id: Date.now(),
         timestamp: Date.now(),
-        prompt: text,
+        prompt: english,
+        promptHe: hebrew || null,
         actions: result.actions,
         description: result.robotMessage,
         previousDefinition: currentGame.definition,
@@ -165,11 +189,15 @@ export default function GameWorkspacePage() {
 
       setGame(updatedGame)
       setMessages(newMessages)
-      setTitle(updatedGame.title)
+      setTitle(getDisplayTitle(updatedGame.title))
       save(updatedGame)
 
       if (engineRef.current) engineRef.current.stop()
       setupEngine(result.definition)
+
+      if (result.suggestions?.length) {
+        setSuggestions(result.suggestions)
+      }
     } else if (result.intent === 'CREATE_GAME' && result.definition) {
       const updatedGame = {
         ...currentGame,
@@ -181,11 +209,11 @@ export default function GameWorkspacePage() {
       }
       setGame(updatedGame)
       setMessages(newMessages)
-      setTitle(updatedGame.title)
+      setTitle(getDisplayTitle(updatedGame.title))
       save(updatedGame)
       setupEngine(result.definition)
 
-      const meta = getTemplateMetadata(result.template)
+      const meta = getTemplateMetadata(result.definition.template)
       setSuggestions(meta?.suggestions || [])
     } else {
       const updatedGame = { ...currentGame, messages: newMessages }
@@ -193,7 +221,9 @@ export default function GameWorkspacePage() {
       setMessages(newMessages)
       save(updatedGame)
     }
-  }, [save, setupEngine])
+
+    setBusy(false)
+  }, [save, setupEngine, busy, t])
 
   const handleUndo = useCallback(() => {
     const currentGame = gameRef.current
@@ -202,7 +232,13 @@ export default function GameWorkspacePage() {
     const history = [...currentGame.history]
     const lastEntry = history.pop()
 
-    const undoMsg = { id: Date.now(), role: 'robot', text: 'No problem! ↩️\n\nI changed it back.', timestamp: Date.now() }
+    const undoMsg = {
+      id: Date.now(),
+      role: 'robot',
+      text: t('controls.undo') + ' ↩️',
+      textHe: t('controls.undo') + ' ↩️',
+      timestamp: Date.now(),
+    }
 
     const updatedGame = {
       ...currentGame,
@@ -215,7 +251,7 @@ export default function GameWorkspacePage() {
     setMessages(updatedGame.messages)
     save(updatedGame)
     setupEngine(lastEntry.previousDefinition)
-  }, [save, setupEngine])
+  }, [save, setupEngine, t])
 
   const handlePlay = () => {
     const engine = engineRef.current
@@ -233,9 +269,10 @@ export default function GameWorkspacePage() {
     if (!editingTitle) { setEditingTitle(true); return }
     setEditingTitle(false)
     const currentGame = gameRef.current
-    if (currentGame && title !== currentGame.title) {
-      const updatedGame = { ...currentGame, title }
-      updatedGame.definition = { ...updatedGame.definition, title }
+    if (currentGame && title !== getDisplayTitle(currentGame.title)) {
+      const newTitle = { he: title, en: title }
+      const updatedGame = { ...currentGame, title: newTitle }
+      updatedGame.definition = { ...updatedGame.definition, title: newTitle }
       setGame(updatedGame)
       save(updatedGame)
     }
@@ -291,6 +328,7 @@ export default function GameWorkspacePage() {
               onBlur={handleTitleChange}
               onKeyDown={(e) => { if (e.key === 'Enter') handleTitleChange() }}
               autoFocus
+              dir="ltr"
               style={{
                 fontSize: '1rem',
                 fontWeight: 600,
@@ -324,9 +362,9 @@ export default function GameWorkspacePage() {
           <button
             className="btn btn-secondary btn-sm"
             onClick={() => router.push('/games')}
-            style={{ marginLeft: 'auto', padding: '6px 12px', fontSize: '0.85rem' }}
+            style={{ marginInlineStart: 'auto', padding: '6px 12px', fontSize: '0.85rem' }}
           >
-            {isMobile ? '🏠' : '🏠 My Games'}
+            {isMobile ? '🏠' : `🏠 ${t('nav.myGames')}`}
           </button>
         </div>
 
@@ -341,7 +379,7 @@ export default function GameWorkspacePage() {
               width: '300px',
               minWidth: '280px',
               maxWidth: '340px',
-              borderRight: '1px solid #eee',
+              borderInlineEnd: '1px solid #eee',
               display: 'flex',
               flexDirection: 'column',
               flexShrink: 0,
@@ -350,6 +388,7 @@ export default function GameWorkspacePage() {
                 messages={messages}
                 suggestions={suggestions}
                 onSend={handleSend}
+                disabled={busy}
               />
             </div>
           )}
@@ -374,6 +413,7 @@ export default function GameWorkspacePage() {
                 messages={messages}
                 suggestions={suggestions}
                 onSend={handleSend}
+                disabled={busy}
               />
             </div>
           )}
@@ -387,6 +427,7 @@ export default function GameWorkspacePage() {
           }}>
             <div
               ref={gameContainerRef}
+              dir="ltr"
               style={{
                 flex: 1,
                 display: 'flex',

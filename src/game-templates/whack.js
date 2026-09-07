@@ -15,9 +15,9 @@ export const whackTemplate = {
   description: 'Whack the moles before they hide!',
   examplePrompt: 'Make a whack a mole game',
   suggestions: [
-    { text: 'Make it harder', icon: '⚡' },
-    { text: 'Make it easier', icon: '😊' },
-    { text: 'Make the background forest', icon: '🌲' },
+    { he: 'יותר קשה', en: 'make it harder', icon: '⚡' },
+    { he: 'יותר קל', en: 'make it easier', icon: '😊' },
+    { he: 'רקע של יער', en: 'make the background forest', icon: '🌲' },
   ],
 
   getDefaultDefinition() {

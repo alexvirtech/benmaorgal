@@ -5,12 +5,14 @@ import { useRouter } from 'next/navigation'
 import Navigation from '@/components/layout/Navigation'
 import GameCard from '@/components/games/GameCard'
 import { getGames, deleteGame } from '@/repositories/localGameRepository'
+import { useLang } from '@/i18n'
 
 export default function MyGamesPage() {
   const router = useRouter()
   const [games, setGames] = useState([])
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [loaded, setLoaded] = useState(false)
+  const { t } = useLang()
 
   useEffect(() => {
     setGames(getGames())
@@ -36,13 +38,13 @@ export default function MyGamesPage() {
       <Navigation />
       <div className="page-container">
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px', flexWrap: 'wrap' }}>
-          <h1 style={{ fontSize: '1.8rem', fontWeight: 700 }}>🎮 My Games</h1>
+          <h1 style={{ fontSize: '1.8rem', fontWeight: 700 }}>🎮 {t('games.myGames')}</h1>
           <button
             className="btn btn-primary btn-sm"
             onClick={() => router.push('/')}
-            style={{ marginLeft: 'auto' }}
+            style={{ marginInlineStart: 'auto' }}
           >
-            + Create New Game
+            + {t('games.createNew')}
           </button>
         </div>
 
@@ -53,10 +55,10 @@ export default function MyGamesPage() {
             color: '#636e72',
           }}>
             <div style={{ fontSize: '4rem', marginBottom: '16px' }}>🎮</div>
-            <h2 style={{ marginBottom: '8px' }}>You haven&apos;t made a game yet!</h2>
-            <p style={{ marginBottom: '24px' }}>Tell the robot your first idea.</p>
+            <h2 style={{ marginBottom: '8px' }}>{t('games.empty')}</h2>
+            <p style={{ marginBottom: '24px' }}>{t('home.subtitle')}</p>
             <button className="btn btn-primary btn-lg" onClick={() => router.push('/')}>
-              ✨ Make My First Game
+              ✨ {t('nav.create')}
             </button>
           </div>
         ) : (
@@ -74,14 +76,13 @@ export default function MyGamesPage() {
         {deleteTarget && (
           <div className="modal-overlay" onClick={() => setDeleteTarget(null)}>
             <div className="modal" onClick={(e) => e.stopPropagation()}>
-              <h3>Delete &quot;{deleteTarget.title}&quot;?</h3>
-              <p>Your game will disappear.</p>
+              <h3>{t('games.deleteConfirm', { title: deleteTarget.title })}</h3>
               <div className="modal-actions">
                 <button className="btn btn-secondary btn-sm" onClick={() => setDeleteTarget(null)}>
-                  Cancel
+                  ✕
                 </button>
                 <button className="btn btn-danger btn-sm" onClick={confirmDelete}>
-                  🗑 Delete
+                  🗑
                 </button>
               </div>
             </div>

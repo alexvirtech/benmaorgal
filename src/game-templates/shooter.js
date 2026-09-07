@@ -10,10 +10,10 @@ export const shooterTemplate = {
   description: 'Shoot enemies',
   examplePrompt: 'Make a spaceship shoot aliens',
   suggestions: [
-    { text: 'Make me faster', icon: '💨' },
-    { text: 'Add bombs', icon: '💣' },
-    { text: 'Make it harder', icon: '⚡' },
-    { text: 'Give me 5 lives', icon: '❤️' },
+    { he: 'תעשה אותי מהר יותר', en: 'make the player faster', icon: '💨' },
+    { he: 'תוסיף פצצות', en: 'add bombs', icon: '💣' },
+    { he: 'יותר קשה', en: 'make it harder', icon: '⚡' },
+    { he: 'תן לי 5 חיים', en: 'give me 5 lives', icon: '❤️' },
   ],
 
   getDefaultDefinition() {

@@ -9,9 +9,9 @@ export const clickerTemplate = {
   description: 'Click before it disappears',
   examplePrompt: 'Make a game where I click the monster',
   suggestions: [
-    { text: 'Make it harder', icon: '⚡' },
-    { text: 'Make it easier', icon: '😊' },
-    { text: 'Make the background forest', icon: '🌲' },
+    { he: 'יותר קשה', en: 'make it harder', icon: '⚡' },
+    { he: 'יותר קל', en: 'make it easier', icon: '😊' },
+    { he: 'רקע של יער', en: 'make the background forest', icon: '🌲' },
   ],
 
   getDefaultDefinition() {

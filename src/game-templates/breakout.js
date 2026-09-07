@@ -19,10 +19,10 @@ export const breakoutTemplate = {
   description: 'Break all the bricks',
   examplePrompt: 'Make a game where I break bricks',
   suggestions: [
-    { text: 'Make me faster', icon: '💨' },
-    { text: 'Make it harder', icon: '⚡' },
-    { text: 'Give me 5 lives', icon: '❤️' },
-    { text: 'Make the background space', icon: '🌌' },
+    { he: 'תעשה אותי מהר יותר', en: 'make the player faster', icon: '💨' },
+    { he: 'יותר קשה', en: 'make it harder', icon: '⚡' },
+    { he: 'תן לי 5 חיים', en: 'give me 5 lives', icon: '❤️' },
+    { he: 'רקע של חלל', en: 'make the background space', icon: '🌌' },
   ],
 
   getDefaultDefinition() {

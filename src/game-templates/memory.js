@@ -10,9 +10,9 @@ export const memoryTemplate = {
   description: 'Match the pairs',
   examplePrompt: 'Make a matching cards game',
   suggestions: [
-    { text: 'Make it harder', icon: '⚡' },
-    { text: 'Make it easier', icon: '😊' },
-    { text: 'Make the background ocean', icon: '🌊' },
+    { he: 'יותר קשה', en: 'make it harder', icon: '⚡' },
+    { he: 'יותר קל', en: 'make it easier', icon: '😊' },
+    { he: 'רקע של ים', en: 'make the background ocean', icon: '🌊' },
   ],
 
   getDefaultDefinition() {

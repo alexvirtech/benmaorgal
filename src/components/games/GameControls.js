@@ -1,6 +1,9 @@
 'use client'
 
+import { useLang } from '@/i18n'
+
 export default function GameControls({ gameState, onPlay, onPause, onRestart, onUndo, canUndo }) {
+  const { t } = useLang()
   const status = gameState?.status || 'ready'
   const isPlaying = status === 'playing'
   const isPaused = status === 'paused'
@@ -20,40 +23,38 @@ export default function GameControls({ gameState, onPlay, onPause, onRestart, on
     }}>
       {isPlaying ? (
         <button className="btn btn-secondary btn-sm" onClick={onPause}>
-          ⏸ Pause
+          ⏸ {t('controls.pause')}
         </button>
       ) : isPaused ? (
-        <>
-          <button className="btn btn-accent btn-sm" onClick={onPlay}>
-            ▶ Continue
-          </button>
-        </>
+        <button className="btn btn-accent btn-sm" onClick={onPlay}>
+          ▶ {t('controls.continue')}
+        </button>
       ) : (
         <button className="btn btn-primary btn-sm" onClick={onPlay}>
-          {isOver ? '🔄 Play Again' : '▶ Play'}
+          {isOver ? `🔄 ${t('controls.restart')}` : `▶ ${t('controls.play')}`}
         </button>
       )}
 
       <button className="btn btn-secondary btn-sm" onClick={onRestart}>
-        🔄 Restart
+        🔄 {t('controls.restart')}
       </button>
 
       {canUndo && (
         <button className="btn btn-secondary btn-sm" onClick={onUndo}>
-          ↩ Undo
+          ↩ {t('controls.undo')}
         </button>
       )}
 
       {gameState && (
         <div style={{
-          marginLeft: 'auto',
+          marginInlineStart: 'auto',
           display: 'flex',
           gap: '16px',
           fontSize: '0.9rem',
           color: '#636e72',
         }}>
-          <span>Score: <strong>{gameState.score}</strong></span>
-          {gameState.lives < 99 && <span>Lives: <strong>{'❤️'.repeat(Math.min(gameState.lives, 10))}</strong></span>}
+          <span>{t('game.score')}: <strong>{gameState.score}</strong></span>
+          {gameState.lives < 99 && <span>{t('game.lives')}: <strong>{'❤️'.repeat(Math.min(gameState.lives, 10))}</strong></span>}
         </div>
       )}
     </div>

@@ -10,10 +10,10 @@ export const dodgeTemplate = {
   description: 'Avoid falling hazards',
   examplePrompt: 'Make a game where I avoid bombs',
   suggestions: [
-    { text: 'Make me faster', icon: '💨' },
-    { text: 'Make it harder', icon: '⚡' },
-    { text: 'Give me 5 lives', icon: '❤️' },
-    { text: 'Make the background night', icon: '🌙' },
+    { he: 'תעשה אותי מהר יותר', en: 'make the player faster', icon: '💨' },
+    { he: 'יותר קשה', en: 'make it harder', icon: '⚡' },
+    { he: 'תן לי 5 חיים', en: 'give me 5 lives', icon: '❤️' },
+    { he: 'רקע של לילה', en: 'make the background night', icon: '🌙' },
   ],
 
   getDefaultDefinition() {
