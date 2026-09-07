@@ -39,17 +39,9 @@ export default function GameViewport({ definition, onStateChange }) {
     engine.setDefinition(def)
     engine.setTemplate(template)
     engine.state.lives = def.rules?.startingLives || 3
+    engine.onStateChange = onStateChange || null
 
     template.setup(engine, def)
-
-    const origUpdate = template.update.bind(template)
-    template.update = (eng, dt) => {
-      input.update()
-      origUpdate(eng, dt)
-      if (onStateChange) {
-        onStateChange({ ...eng.state })
-      }
-    }
 
     engineRef.current = engine
     inputRef.current = input

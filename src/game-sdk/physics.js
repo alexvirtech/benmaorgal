@@ -34,6 +34,33 @@ export function isOutOfBounds(entity) {
   )
 }
 
+export function applyMotion(entity, dt) {
+  const motion = entity.motion
+  if (!motion) return
+
+  switch (motion) {
+    case 'zigzag':
+      if (!entity._zigTimer) entity._zigTimer = 0
+      entity._zigTimer += dt
+      entity.vx = Math.sin(entity._zigTimer * 3) * (entity.speed || 3) * 1.5
+      break
+    case 'drift':
+      if (!entity._driftPhase) entity._driftPhase = Math.random() * Math.PI * 2
+      entity._driftPhase += dt * 0.8
+      entity.vx = Math.sin(entity._driftPhase) * (entity.speed || 2) * 0.8
+      break
+    case 'spin':
+      if (!entity._spinAngle) entity._spinAngle = 0
+      entity._spinAngle += dt * 4
+      entity.spin = true
+      entity.spinSpeed = 4
+      break
+    case 'fall':
+    default:
+      break
+  }
+}
+
 export function bounceBall(ball, paddle, wallBounce = true) {
   if (wallBounce) {
     if (ball.x <= 0 || ball.x + ball.width >= GAME_WIDTH) {

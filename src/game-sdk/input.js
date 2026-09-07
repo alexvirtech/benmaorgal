@@ -13,6 +13,9 @@ export class InputManager {
     this._clickedThisFrame = false
     this._boundKeyDown = null
     this._boundKeyUp = null
+    this._boundPointerDown = null
+    this._boundPointerMove = null
+    this._boundPointerUp = null
     this._canvas = null
   }
 
@@ -29,10 +32,7 @@ export class InputManager {
       this.keys[e.code] = false
     }
 
-    window.addEventListener('keydown', this._boundKeyDown)
-    window.addEventListener('keyup', this._boundKeyUp)
-
-    canvas.addEventListener('pointerdown', (e) => {
+    this._boundPointerDown = (e) => {
       const rect = canvas.getBoundingClientRect()
       const scaleX = 800 / rect.width
       const scaleY = 600 / rect.height
@@ -40,19 +40,25 @@ export class InputManager {
       this.pointer.y = (e.clientY - rect.top) * scaleY
       this.pointer.down = true
       this._clickedThisFrame = true
-    })
+    }
 
-    canvas.addEventListener('pointermove', (e) => {
+    this._boundPointerMove = (e) => {
       const rect = canvas.getBoundingClientRect()
       const scaleX = 800 / rect.width
       const scaleY = 600 / rect.height
       this.pointer.x = (e.clientX - rect.left) * scaleX
       this.pointer.y = (e.clientY - rect.top) * scaleY
-    })
+    }
 
-    canvas.addEventListener('pointerup', () => {
+    this._boundPointerUp = () => {
       this.pointer.down = false
-    })
+    }
+
+    window.addEventListener('keydown', this._boundKeyDown)
+    window.addEventListener('keyup', this._boundKeyUp)
+    canvas.addEventListener('pointerdown', this._boundPointerDown)
+    canvas.addEventListener('pointermove', this._boundPointerMove)
+    canvas.addEventListener('pointerup', this._boundPointerUp)
   }
 
   update() {
@@ -75,5 +81,11 @@ export class InputManager {
       window.removeEventListener('keydown', this._boundKeyDown)
       window.removeEventListener('keyup', this._boundKeyUp)
     }
+    if (this._canvas) {
+      this._canvas.removeEventListener('pointerdown', this._boundPointerDown)
+      this._canvas.removeEventListener('pointermove', this._boundPointerMove)
+      this._canvas.removeEventListener('pointerup', this._boundPointerUp)
+    }
+    this._canvas = null
   }
 }

@@ -37,6 +37,7 @@ export function validateGameDefinition(def) {
 function validateObject(obj) {
   if (!obj || typeof obj !== 'object') return null
   return {
+    ...obj,
     id: obj.id || `obj_${Math.random().toString(36).slice(2, 8)}`,
     role: ['collectible', 'hazard', 'enemy', 'obstacle', 'decoration'].includes(obj.role) ? obj.role : 'obstacle',
     type: obj.type || 'star',
@@ -44,10 +45,6 @@ function validateObject(obj) {
     spawnRate: clamp(obj.spawnRate ?? 1200, 200, 10000),
     points: clamp(obj.points ?? 1, 0, 100),
     effect: obj.effect || null,
-    ...obj,
-    speed: clamp(obj.speed ?? 3, 0.5, 15),
-    spawnRate: clamp(obj.spawnRate ?? 1200, 200, 10000),
-    points: clamp(obj.points ?? 1, 0, 100),
   }
 }
 

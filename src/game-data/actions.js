@@ -5,9 +5,11 @@ export const ACTION_TYPES = [
   'SET_PROPERTY',
   'ADD_OBJECT',
   'REMOVE_OBJECT',
+  'MODIFY_OBJECT',
   'CHANGE_THEME',
   'CHANGE_PLAYER',
   'SET_DIFFICULTY',
+  'SET_TITLE',
   'RESET_GAME',
 ]
 
@@ -22,7 +24,12 @@ export function applyGameAction(definition, action) {
         if (!target[parts[i]]) target[parts[i]] = {}
         target = target[parts[i]]
       }
-      target[parts[parts.length - 1]] = action.value
+      const key = parts[parts.length - 1]
+      if (action.delta != null) {
+        target[key] = (target[key] || 0) + action.delta
+      } else {
+        target[key] = action.value
+      }
       break
     }
 
@@ -52,6 +59,26 @@ export function applyGameAction(definition, action) {
 
     case 'CHANGE_PLAYER': {
       def.player = { ...def.player, ...action.player }
+      break
+    }
+
+    case 'MODIFY_OBJECT': {
+      if (def.objects) {
+        def.objects = def.objects.map(o => {
+          const match = action.match || {}
+          if (match.type && o.type !== match.type) return o
+          if (match.role && o.role !== match.role) return o
+          if (match.id && o.id !== match.id) return o
+          return { ...o, ...action.changes }
+        })
+      }
+      break
+    }
+
+    case 'SET_TITLE': {
+      if (action.title) {
+        def.title = typeof action.title === 'object' ? action.title : { he: action.title, en: action.title }
+      }
       break
     }
 
@@ -99,17 +126,22 @@ export function applyActions(definition, actions) {
 export function describeAction(action) {
   switch (action.type) {
     case 'SET_PROPERTY':
+      if (action.delta != null) return `Changed ${action.path} by ${action.delta > 0 ? '+' : ''}${action.delta}`
       return `Changed ${action.path} to ${action.value}`
     case 'ADD_OBJECT':
       return `Added ${action.object.type || action.object.role}`
     case 'REMOVE_OBJECT':
       return `Removed ${action.objectType}`
+    case 'MODIFY_OBJECT':
+      return `Modified ${action.match?.type || action.match?.role || 'objects'}`
     case 'CHANGE_THEME':
       return `Changed theme`
     case 'CHANGE_PLAYER':
       return `Changed player`
     case 'SET_DIFFICULTY':
       return `Set difficulty to ${action.difficulty}`
+    case 'SET_TITLE':
+      return `Set title`
     case 'RESET_GAME':
       return `Reset game`
     default:

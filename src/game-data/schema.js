@@ -47,5 +47,9 @@ export function createGameDefinition(overrides = {}) {
 }
 
 export function getSprite(type) {
-  return SPRITES[type] || type || '❓'
+  if (SPRITES[type]) return SPRITES[type]
+  if (typeof process !== 'undefined' && process.env?.NODE_ENV !== 'production') {
+    console.warn(`Unknown sprite type: "${type}", using fallback`)
+  }
+  return '✨'
 }

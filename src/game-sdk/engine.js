@@ -26,6 +26,7 @@ export class GameEngine {
     this._listeners = {}
     this._customState = {}
     this._shake = { intensity: 0, timer: 0, duration: 0 }
+    this.onStateChange = null
   }
 
   setDefinition(definition) {
@@ -259,7 +260,6 @@ export class GameEngine {
     this.particles = []
     this.floatingTexts = []
     this._customState = {}
-    this._listeners = {}
     this._shake = { intensity: 0, timer: 0, duration: 0 }
     this.state = {
       status: 'ready',
@@ -285,11 +285,13 @@ export class GameEngine {
 
       if (this.state.status === 'playing') {
         this.state.elapsed += dt
+        if (this.input) this.input.update()
         this.updateParticles(dt)
         if (this.template && this.template.update) {
           this.template.update(this, dt)
         }
         this._updateDecorations(dt)
+        if (this.onStateChange) this.onStateChange({ ...this.state })
       }
 
       this._render()
