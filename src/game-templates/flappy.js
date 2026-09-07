@@ -156,7 +156,7 @@ export const flappyTemplate = {
   },
 
   render(engine, ctx) {
-    drawBackground(ctx, engine.definition?.theme?.background || 'sky')
+    drawBackground(ctx, engine.definition?.theme || 'sky')
 
     ctx.fillStyle = '#5a3a1a'
     ctx.fillRect(0, GAME_HEIGHT - 40, GAME_WIDTH, 40)

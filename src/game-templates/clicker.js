@@ -117,7 +117,7 @@ export const clickerTemplate = {
   },
 
   render(engine, ctx) {
-    drawBackground(ctx, engine.definition?.theme?.background || 'forest')
+    drawBackground(ctx, engine.definition?.theme || 'forest')
 
     const timeLeft = Math.max(0, engine.get('timeLeft') || 0)
     ctx.fillStyle = 'rgba(0,0,0,0.5)'

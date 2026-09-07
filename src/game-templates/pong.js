@@ -125,7 +125,7 @@ export const pongTemplate = {
   },
 
   render(engine, ctx) {
-    drawBackground(ctx, engine.definition?.theme?.background || 'night')
+    drawBackground(ctx, engine.definition?.theme || 'night')
 
     ctx.setLineDash([8, 8])
     ctx.strokeStyle = 'rgba(255,255,255,0.15)'

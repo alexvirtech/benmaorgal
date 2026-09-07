@@ -137,7 +137,7 @@ export const catchTemplate = {
   },
 
   render(engine, ctx) {
-    drawBackground(ctx, engine.definition?.theme?.background || 'sky')
+    drawBackground(ctx, engine.definition?.theme || 'sky')
     const t = engine.state.elapsed
     for (const e of engine.entities.values()) {
       if (e.active && e.visible) drawEntity(ctx, e, t)

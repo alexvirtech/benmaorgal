@@ -172,7 +172,7 @@ export const breakoutTemplate = {
   },
 
   render(engine, ctx) {
-    drawBackground(ctx, engine.definition?.theme?.background || 'night')
+    drawBackground(ctx, engine.definition?.theme || 'night')
 
     for (const e of engine.entities.values()) {
       if (!e.active || !e.visible) continue

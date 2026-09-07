@@ -3,6 +3,7 @@
 export default function GameControls({ gameState, onPlay, onPause, onRestart, onUndo, canUndo }) {
   const status = gameState?.status || 'ready'
   const isPlaying = status === 'playing'
+  const isPaused = status === 'paused'
   const isOver = status === 'won' || status === 'lost'
 
   return (
@@ -21,6 +22,12 @@ export default function GameControls({ gameState, onPlay, onPause, onRestart, on
         <button className="btn btn-secondary btn-sm" onClick={onPause}>
           ⏸ Pause
         </button>
+      ) : isPaused ? (
+        <>
+          <button className="btn btn-accent btn-sm" onClick={onPlay}>
+            ▶ Continue
+          </button>
+        </>
       ) : (
         <button className="btn btn-primary btn-sm" onClick={onPlay}>
           {isOver ? '🔄 Play Again' : '▶ Play'}

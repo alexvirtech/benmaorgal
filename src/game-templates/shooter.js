@@ -161,7 +161,7 @@ export const shooterTemplate = {
   },
 
   render(engine, ctx) {
-    drawBackground(ctx, engine.definition?.theme?.background || 'space')
+    drawBackground(ctx, engine.definition?.theme || 'space')
     const t = engine.state.elapsed
     for (const e of engine.entities.values()) {
       if (!e.active || !e.visible) continue

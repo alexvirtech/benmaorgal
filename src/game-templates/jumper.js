@@ -159,7 +159,7 @@ export const jumperTemplate = {
   },
 
   render(engine, ctx) {
-    drawBackground(ctx, engine.definition?.theme?.background || 'grass')
+    drawBackground(ctx, engine.definition?.theme || 'grass')
 
     ctx.fillStyle = '#5a3a1a'
     ctx.fillRect(0, GROUND_Y, GAME_WIDTH, GAME_HEIGHT - GROUND_Y)

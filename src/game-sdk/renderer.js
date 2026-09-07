@@ -12,7 +12,15 @@ const BACKGROUNDS = {
 }
 
 export function drawBackground(ctx, theme) {
-  const bg = BACKGROUNDS[theme] || BACKGROUNDS.sky
+  let bgName, groundColor
+  if (typeof theme === 'object' && theme !== null) {
+    bgName = theme.background || 'sky'
+    groundColor = theme.groundColor
+  } else {
+    bgName = theme || 'sky'
+  }
+
+  const bg = BACKGROUNDS[bgName] || BACKGROUNDS.sky
   const grad = ctx.createLinearGradient(0, 0, 0, GAME_HEIGHT)
   grad.addColorStop(0, bg.top)
   grad.addColorStop(1, bg.bottom)
@@ -21,7 +29,7 @@ export function drawBackground(ctx, theme) {
 
   if (bg.stars) {
     ctx.fillStyle = '#ffffff'
-    const seed = theme === 'space' ? 42 : 99
+    const seed = bgName === 'space' ? 42 : 99
     for (let i = 0; i < 80; i++) {
       const x = ((seed * (i + 1) * 7919) % GAME_WIDTH)
       const y = ((seed * (i + 1) * 104729) % (GAME_HEIGHT - 100))
@@ -32,8 +40,9 @@ export function drawBackground(ctx, theme) {
     }
   }
 
-  if (bg.ground) {
-    ctx.fillStyle = bg.ground
+  const gColor = groundColor || bg.ground
+  if (gColor) {
+    ctx.fillStyle = gColor
     ctx.fillRect(0, GAME_HEIGHT - 40, GAME_WIDTH, 40)
   }
 }

@@ -130,7 +130,7 @@ export const snakeTemplate = {
   },
 
   render(engine, ctx) {
-    drawBackground(ctx, engine.definition?.theme?.background || 'grass')
+    drawBackground(ctx, engine.definition?.theme || 'grass')
 
     ctx.fillStyle = 'rgba(0,0,0,0.1)'
     ctx.fillRect(0, HUD_H, COLS * CELL, ROWS * CELL)

@@ -158,6 +158,24 @@ export const MODIFICATION_PATTERNS = [
     description: (m) => `Changed the background to ${m[1]}! 🎨`,
   },
   {
+    match: /(?:make|change|set)\s+(?:the\s+)?ground\s+(?:color\s+)?(?:to\s+)?(?:a\s+)?([\w\s]+?)$/i,
+    action: (m) => {
+      const COLOR_MAP = {
+        red: '#cc3333', 'dark red': '#8b0000',
+        green: '#33cc33', 'dark green': '#1a5c1a', 'light green': '#90ee90',
+        blue: '#3333cc', 'dark blue': '#00008b', 'light blue': '#add8e6',
+        yellow: '#cccc33', brown: '#8b4513', 'dark brown': '#3e2723',
+        black: '#222', white: '#eee', gray: '#888', grey: '#888',
+        orange: '#ff8c00', purple: '#6a0dad', pink: '#ff69b4',
+        sand: '#c4a35a', dirt: '#6b4423',
+      }
+      const name = m[1].trim().toLowerCase()
+      const color = COLOR_MAP[name] || name
+      return { type: 'CHANGE_THEME', theme: { groundColor: color } }
+    },
+    description: (m) => `Changed the ground to ${m[1].trim()}! 🎨`,
+  },
+  {
     match: /(?:change|make)\s+(?:the\s+)?(?:player|character)\s+(?:to\s+)?(?:a\s+)?(\w+)/i,
     action: (m) => ({ type: 'CHANGE_PLAYER', player: { type: m[1].toLowerCase() } }),
     description: (m) => `Changed player to ${m[1]}! 🎭`,

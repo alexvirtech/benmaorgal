@@ -116,7 +116,7 @@ export const dodgeTemplate = {
   },
 
   render(engine, ctx) {
-    drawBackground(ctx, engine.definition?.theme?.background || 'city')
+    drawBackground(ctx, engine.definition?.theme || 'city')
     const t = engine.state.elapsed
     for (const e of engine.entities.values()) {
       if (e.active && e.visible) drawEntity(ctx, e, t)

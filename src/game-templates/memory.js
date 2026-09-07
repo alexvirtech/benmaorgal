@@ -141,7 +141,7 @@ export const memoryTemplate = {
   },
 
   render(engine, ctx) {
-    drawBackground(ctx, engine.definition?.theme?.background || 'sky')
+    drawBackground(ctx, engine.definition?.theme || 'sky')
 
     const cards = engine.get('cards') || []
     const t = engine.state.elapsed

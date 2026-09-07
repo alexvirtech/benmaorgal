@@ -154,7 +154,7 @@ export const whackTemplate = {
   },
 
   render(engine, ctx) {
-    drawBackground(ctx, engine.definition?.theme?.background || 'grass')
+    drawBackground(ctx, engine.definition?.theme || 'grass')
 
     const timeLeft = Math.max(0, engine.get('timeLeft') || 0)
     ctx.fillStyle = 'rgba(0,0,0,0.5)'
