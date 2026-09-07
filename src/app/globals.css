@@ -19,6 +19,7 @@
   --shadow: 0 4px 20px rgba(108, 92, 231, 0.1);
   --shadow-lg: 0 8px 40px rgba(108, 92, 231, 0.15);
   --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --nav-height: 56px;
 }
 
 * {
@@ -33,6 +34,7 @@ html, body {
   color: var(--text);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
 a {
@@ -126,6 +128,7 @@ button {
   position: sticky;
   top: 0;
   z-index: 50;
+  height: var(--nav-height);
 }
 
 .nav-brand {
@@ -135,6 +138,17 @@ button {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.nav-toggle {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  margin-left: auto;
+  color: var(--text);
 }
 
 .nav-links {
@@ -228,6 +242,11 @@ button {
   to { transform: rotate(360deg); }
 }
 
+@keyframes micPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255,68,68,0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(255,68,68,0); }
+}
+
 .saved-indicator {
   display: inline-flex;
   align-items: center;
@@ -241,8 +260,37 @@ button {
 }
 
 @media (max-width: 768px) {
-  .nav { padding: 10px 16px; }
-  .nav-brand { font-size: 1.1rem; }
-  .page-container { padding: 16px; }
-  .btn-lg { padding: 14px 24px; font-size: 1rem; }
+  .nav {
+    padding: 10px 16px;
+  }
+  .nav-brand {
+    font-size: 1.1rem;
+  }
+  .nav-toggle {
+    display: block;
+  }
+  .nav-links {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 12px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 8px;
+    box-shadow: var(--shadow-lg);
+    flex-direction: column;
+    min-width: 160px;
+    z-index: 60;
+  }
+  .nav-links.open {
+    display: flex;
+  }
+  .page-container {
+    padding: 16px;
+  }
+  .btn-lg {
+    padding: 14px 24px;
+    font-size: 1rem;
+  }
 }

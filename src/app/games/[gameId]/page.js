@@ -22,11 +22,28 @@ export default function GameWorkspacePage() {
   const [loaded, setLoaded] = useState(false)
   const [title, setTitle] = useState('')
   const [editingTitle, setEditingTitle] = useState(false)
+  const [chatOpen, setChatOpen] = useState(true)
+  const [isMobile, setIsMobile] = useState(false)
 
   const canvasRef = useRef(null)
   const engineRef = useRef(null)
   const inputRef = useRef(null)
   const gameRef = useRef(null)
+  const gameContainerRef = useRef(null)
+
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth <= 768
+      setIsMobile(mobile)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
+  useEffect(() => {
+    setChatOpen(!isMobile)
+  }, [isMobile])
 
   useEffect(() => {
     const g = getGame(gameId)
@@ -43,26 +60,30 @@ export default function GameWorkspacePage() {
     setLoaded(true)
   }, [gameId, router])
 
+  const resizeCanvas = useCallback(() => {
+    if (!canvasRef.current || !gameContainerRef.current) return
+    const rect = gameContainerRef.current.getBoundingClientRect()
+    const maxW = rect.width - 24
+    const maxH = rect.height - 24
+    if (maxW <= 0 || maxH <= 0) return
+    const scale = Math.min(maxW / GAME_WIDTH, maxH / GAME_HEIGHT)
+    canvasRef.current.width = GAME_WIDTH * scale
+    canvasRef.current.height = GAME_HEIGHT * scale
+    canvasRef.current.style.width = `${GAME_WIDTH * scale}px`
+    canvasRef.current.style.height = `${GAME_HEIGHT * scale}px`
+  }, [])
+
   const setupEngine = useCallback((def) => {
     if (!canvasRef.current || !def) return
 
     if (engineRef.current) engineRef.current.stop()
     if (inputRef.current) inputRef.current.detach()
 
-    const canvas = canvasRef.current
-    const container = canvas.parentElement
-    const rect = container.getBoundingClientRect()
-    const maxW = rect.width
-    const maxH = Math.max(400, rect.height || 500)
-    const scale = Math.min(maxW / GAME_WIDTH, maxH / GAME_HEIGHT, 1)
-    canvas.width = GAME_WIDTH * scale
-    canvas.height = GAME_HEIGHT * scale
-    canvas.style.width = `${GAME_WIDTH * scale}px`
-    canvas.style.height = `${GAME_HEIGHT * scale}px`
+    resizeCanvas()
 
-    const engine = new GameEngine(canvas)
+    const engine = new GameEngine(canvasRef.current)
     const input = new InputManager()
-    input.attach(canvas)
+    input.attach(canvasRef.current)
     engine.input = input
 
     const template = getTemplate(def.template)
@@ -83,7 +104,7 @@ export default function GameWorkspacePage() {
 
     engineRef.current = engine
     inputRef.current = input
-  }, [])
+  }, [resizeCanvas])
 
   useEffect(() => {
     if (game) {
@@ -94,6 +115,16 @@ export default function GameWorkspacePage() {
       if (inputRef.current) inputRef.current.detach()
     }
   }, [game, setupEngine])
+
+  useEffect(() => {
+    const timer = setTimeout(resizeCanvas, 50)
+    return () => clearTimeout(timer)
+  }, [chatOpen, resizeCanvas])
+
+  useEffect(() => {
+    window.addEventListener('resize', resizeCanvas)
+    return () => window.removeEventListener('resize', resizeCanvas)
+  }, [resizeCanvas])
 
   const save = useCallback((updatedGame) => {
     saveGame(updatedGame)
@@ -222,15 +253,37 @@ export default function GameWorkspacePage() {
         overflow: 'hidden',
       }}>
         <div style={{
-          padding: '8px 16px',
+          padding: '6px 12px',
           display: 'flex',
           alignItems: 'center',
-          gap: '12px',
+          gap: '8px',
           borderBottom: '1px solid #eee',
           background: '#fff',
           flexWrap: 'wrap',
+          minHeight: '44px',
         }}>
-          <span style={{ fontSize: '1.3rem' }}>🤖</span>
+          <button
+            onClick={() => setChatOpen(!chatOpen)}
+            title={chatOpen ? 'Hide chat' : 'Show chat'}
+            style={{
+              width: '36px',
+              height: '36px',
+              borderRadius: '50%',
+              border: 'none',
+              background: chatOpen ? '#6c5ce7' : '#f0f0f5',
+              color: chatOpen ? '#fff' : '#666',
+              fontSize: '1.1rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'all 0.2s',
+              flexShrink: 0,
+            }}
+          >
+            {chatOpen ? '✕' : '💬'}
+          </button>
+          <span style={{ fontSize: '1.2rem' }}>🤖</span>
           {editingTitle ? (
             <input
               value={title}
@@ -239,30 +292,41 @@ export default function GameWorkspacePage() {
               onKeyDown={(e) => { if (e.key === 'Enter') handleTitleChange() }}
               autoFocus
               style={{
-                fontSize: '1.1rem',
+                fontSize: '1rem',
                 fontWeight: 600,
                 border: '2px solid #6c5ce7',
                 borderRadius: '8px',
                 padding: '4px 8px',
                 outline: 'none',
+                minWidth: 0,
+                flex: 1,
+                maxWidth: '200px',
               }}
             />
           ) : (
             <h2
               onClick={() => setEditingTitle(true)}
-              style={{ fontSize: '1.1rem', fontWeight: 600, cursor: 'pointer' }}
+              style={{
+                fontSize: isMobile ? '0.95rem' : '1.1rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                minWidth: 0,
+              }}
               title="Click to rename"
             >
               🎮 {title}
             </h2>
           )}
-          {saved && <span className="saved-indicator">💾 Saved</span>}
+          {saved && <span className="saved-indicator">💾</span>}
           <button
             className="btn btn-secondary btn-sm"
             onClick={() => router.push('/games')}
-            style={{ marginLeft: 'auto' }}
+            style={{ marginLeft: 'auto', padding: '6px 12px', fontSize: '0.85rem' }}
           >
-            🏠 My Games
+            {isMobile ? '🏠' : '🏠 My Games'}
           </button>
         </div>
 
@@ -270,21 +334,49 @@ export default function GameWorkspacePage() {
           display: 'flex',
           flex: 1,
           overflow: 'hidden',
+          position: 'relative',
         }}>
-          <div style={{
-            width: '35%',
-            minWidth: '280px',
-            maxWidth: '400px',
-            borderRight: '1px solid #eee',
-            display: 'flex',
-            flexDirection: 'column',
-          }}>
-            <RobotChat
-              messages={messages}
-              suggestions={suggestions}
-              onSend={handleSend}
-            />
-          </div>
+          {chatOpen && !isMobile && (
+            <div style={{
+              width: '300px',
+              minWidth: '280px',
+              maxWidth: '340px',
+              borderRight: '1px solid #eee',
+              display: 'flex',
+              flexDirection: 'column',
+              flexShrink: 0,
+            }}>
+              <RobotChat
+                messages={messages}
+                suggestions={suggestions}
+                onSend={handleSend}
+              />
+            </div>
+          )}
+
+          {chatOpen && isMobile && (
+            <div style={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              maxHeight: '60vh',
+              zIndex: 40,
+              background: '#fff',
+              borderTop: '2px solid #6c5ce7',
+              borderRadius: '16px 16px 0 0',
+              boxShadow: '0 -4px 20px rgba(0,0,0,0.15)',
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden',
+            }}>
+              <RobotChat
+                messages={messages}
+                suggestions={suggestions}
+                onSend={handleSend}
+              />
+            </div>
+          )}
 
           <div style={{
             flex: 1,
@@ -293,14 +385,17 @@ export default function GameWorkspacePage() {
             background: '#f0f0f5',
             overflow: 'hidden',
           }}>
-            <div style={{
-              flex: 1,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '12px',
-              overflow: 'hidden',
-            }}>
+            <div
+              ref={gameContainerRef}
+              style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '12px',
+                overflow: 'hidden',
+              }}
+            >
               <canvas
                 ref={canvasRef}
                 style={{
@@ -313,7 +408,7 @@ export default function GameWorkspacePage() {
                 tabIndex={0}
               />
             </div>
-            <div style={{ padding: '0 12px 12px' }}>
+            <div style={{ padding: '0 12px 8px' }}>
               <GameControls
                 gameState={gameState}
                 onPlay={handlePlay}
@@ -326,21 +421,6 @@ export default function GameWorkspacePage() {
           </div>
         </div>
       </div>
-
-      <style jsx>{`
-        @media (max-width: 768px) {
-          div[style*="width: 35%"] {
-            width: 100% !important;
-            max-width: none !important;
-            border-right: none !important;
-            border-bottom: 1px solid #eee;
-            max-height: 40vh;
-          }
-          div[style*="display: flex"][style*="flex: 1"][style*="overflow: hidden"] {
-            flex-direction: column !important;
-          }
-        }
-      `}</style>
     </>
   )
 }
