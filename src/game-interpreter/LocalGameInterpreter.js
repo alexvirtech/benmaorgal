@@ -31,7 +31,7 @@ export function interpretPrompt(prompt, currentGame = null) {
   if (currentGame) {
     return {
       intent: 'UNKNOWN',
-      robotMessage: "Hmm... 🤖\n\nI'm not sure how to do that yet.\n\nTry:\n⭐ \"Make me faster\"\n💣 \"Add bombs\"\n❤️ \"Give me 5 lives\"\n🌌 \"Make the background space\"",
+      robotMessage: "Hmm... 🤖\n\nI'm not sure how to do that yet.\n\nTry:\n⭐ \"Make me faster\"\n💣 \"Add bombs\"\n🚀 \"Add spaceships\"\n❤️ \"Give me 5 lives\"\n🌌 \"Make the background space\"",
     }
   }
 

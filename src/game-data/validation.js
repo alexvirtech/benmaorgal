@@ -38,7 +38,7 @@ function validateObject(obj) {
   if (!obj || typeof obj !== 'object') return null
   return {
     id: obj.id || `obj_${Math.random().toString(36).slice(2, 8)}`,
-    role: ['collectible', 'hazard', 'enemy', 'obstacle'].includes(obj.role) ? obj.role : 'obstacle',
+    role: ['collectible', 'hazard', 'enemy', 'obstacle', 'decoration'].includes(obj.role) ? obj.role : 'obstacle',
     type: obj.type || 'star',
     speed: clamp(obj.speed ?? 3, 0.5, 15),
     spawnRate: clamp(obj.spawnRate ?? 1200, 200, 10000),

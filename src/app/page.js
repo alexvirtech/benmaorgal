@@ -43,12 +43,12 @@ function useSpeechRecognition(lang, onResult) {
 
 async function translateHebrewToEnglish(text) {
   try {
-    const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=he|en`
-    const res = await fetch(url)
+    const params = new URLSearchParams({ q: text, langpair: 'he|en' })
+    const res = await fetch(`https://api.mymemory.translated.net/get?${params}`)
+    if (!res.ok) return text
     const data = await res.json()
-    if (data.responseStatus === 200 && data.responseData?.translatedText) {
-      return data.responseData.translatedText
-    }
+    const translated = data.responseData?.translatedText
+    if (translated && translated !== text) return translated
     return text
   } catch {
     return text

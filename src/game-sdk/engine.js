@@ -272,6 +272,7 @@ export class GameEngine {
       isLost: false,
     }
     if (this.template && this.definition) {
+      this._spawnDecorations()
       this.template.setup(this, this.definition)
     }
     this.start()
@@ -288,6 +289,7 @@ export class GameEngine {
         if (this.template && this.template.update) {
           this.template.update(this, dt)
         }
+        this._updateDecorations(dt)
       }
 
       this._render()
@@ -298,6 +300,45 @@ export class GameEngine {
         this._render()
       }
     })
+  }
+
+  _spawnDecorations() {
+    if (!this.definition?.objects) return
+    for (const obj of this.definition.objects) {
+      if (obj.role !== 'decoration') continue
+      const count = obj.count || 3
+      for (let i = 0; i < count; i++) {
+        this.addEntity({
+          role: 'decoration',
+          type: obj.type || 'decoration',
+          sprite: obj.sprite || '✨',
+          x: Math.random() * GAME_WIDTH,
+          y: 40 + Math.random() * (GAME_HEIGHT - 80),
+          width: obj.size || 45,
+          height: obj.size || 45,
+          vx: (Math.random() - 0.5) * (obj.speed || 1),
+          vy: (Math.random() - 0.5) * (obj.speed || 1),
+          spin: obj.spin !== false,
+          spinSpeed: 1.5,
+          bob: true,
+          bobAmount: 4,
+          bobPhase: Math.random() * Math.PI * 2,
+          opacity: 0.45,
+        })
+      }
+    }
+  }
+
+  _updateDecorations(dt) {
+    for (const e of this.entities.values()) {
+      if (e.role !== 'decoration') continue
+      e.x += (e.vx || 0) * dt * 60
+      e.y += (e.vy || 0) * dt * 60
+      if (e.x > GAME_WIDTH + e.width) e.x = -e.width
+      if (e.x < -e.width) e.x = GAME_WIDTH + e.width
+      if (e.y > GAME_HEIGHT + e.height) e.y = -e.height
+      if (e.y < -e.height) e.y = GAME_HEIGHT + e.height
+    }
   }
 
   _render() {

@@ -43,6 +43,10 @@ export function drawEntity(ctx, entity, time) {
 
   ctx.save()
 
+  if (entity.opacity !== undefined) {
+    ctx.globalAlpha = entity.opacity
+  }
+
   const cx = entity.x + entity.width / 2
   const cy = entity.y + entity.height / 2
 

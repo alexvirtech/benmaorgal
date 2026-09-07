@@ -91,6 +91,23 @@ export const HAZARD_TYPES = {
   meteor: '☄️',
 }
 
+const DECORATION_SPRITES = {
+  spaceship: '🚀', rocket: '🚀', ufo: '🛸', satellite: '🛰️',
+  star: '⭐', planet: '🪐', moon: '🌙', sun: '☀️', comet: '☄️',
+  cloud: '☁️', butterfly: '🦋', balloon: '🎈', flower: '🌸',
+  snowflake: '❄️', rainbow: '🌈', tree: '🌲', mountain: '⛰️',
+  bird: '🐦', fish: '🐟', octopus: '🐙', jellyfish: '🪼',
+  robot: '🤖', alien: '👾', ghost: '👻', monster: '👹',
+  cat: '🐱', dog: '🐶', bunny: '🐰', frog: '🐸',
+  crown: '👑', diamond: '💎', gem: '💎', crystal: '💎',
+  note: '🎵', music: '🎶', heart: '❤️', fire: '🔥',
+  lightning: '⚡', sparkle: '✨', candy: '🍬', cookie: '🍪',
+}
+
+function lookupSprite(type) {
+  return DECORATION_SPRITES[type] || COLLECTIBLE_TYPES[type] || HAZARD_TYPES[type] || PLAYER_TYPES[type]?.sprite || '✨'
+}
+
 export const MODIFICATION_PATTERNS = [
   {
     match: /(?:make|set)\s+(?:it|the\s+\w+|player|cat|dog|frog|car|spaceship|robot)?\s*faster/i,
@@ -159,6 +176,28 @@ export const MODIFICATION_PATTERNS = [
     match: /(?:make|set)\s+(?:it\s+)?(?:the\s+\w+\s+)?smaller/i,
     action: () => ({ type: 'SET_PROPERTY', path: 'player.size', value: null, delta: -10 }),
     description: 'Made the player smaller! 🔬',
+  },
+  {
+    match: /add\s+(?:some\s+|a\s+few\s+|more\s+)?(\w+)/i,
+    action: (m) => {
+      const full = m.input || ''
+      let type = m[1].toLowerCase().replace(/s$/, '')
+      const sprite = lookupSprite(type)
+      const spinning = /spin/i.test(full)
+      return {
+        type: 'ADD_OBJECT',
+        object: {
+          role: 'decoration',
+          type,
+          sprite,
+          count: 5,
+          speed: 1,
+          size: 45,
+          spin: spinning,
+        },
+      }
+    },
+    description: (m) => `Added ${m[1]} to the background! ✨`,
   },
 ]
 
