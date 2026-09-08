@@ -9,7 +9,7 @@ import { GameEngine, GAME_WIDTH, GAME_HEIGHT } from '@/game-sdk/engine'
 import { InputManager } from '@/game-sdk/input'
 import { getTemplate, getTemplateMetadata } from '@/game-templates/index'
 import { routePrompt } from '@/ai/BrainRouter'
-import { getGame, saveGame, getDisplayTitle } from '@/repositories/localGameRepository'
+import { getGame, saveGame, getDisplayTitle, restoreOriginal, saveAsCopy, hasChanges } from '@/repositories/localGameRepository'
 import { useLang } from '@/i18n'
 
 export default function GameWorkspacePage() {
@@ -27,6 +27,11 @@ export default function GameWorkspacePage() {
   const [chatOpen, setChatOpen] = useState(true)
   const [isMobile, setIsMobile] = useState(false)
   const [busy, setBusy] = useState(false)
+  const [showMenu, setShowMenu] = useState(false)
+  const [showRestoreConfirm, setShowRestoreConfirm] = useState(false)
+  const [showSaveAs, setShowSaveAs] = useState(false)
+  const [copyName, setCopyName] = useState('')
+  const [changed, setChanged] = useState(false)
 
   const canvasRef = useRef(null)
   const engineRef = useRef(null)
@@ -58,6 +63,7 @@ export default function GameWorkspacePage() {
     gameRef.current = g
     setMessages(g.messages || [])
     setTitle(getDisplayTitle(g.title))
+    setChanged(hasChanges(g.id))
     const meta = getTemplateMetadata(g.template)
     setSuggestions(meta?.suggestions || [])
     setLoaded(true)
@@ -126,6 +132,7 @@ export default function GameWorkspacePage() {
   const save = useCallback((updatedGame) => {
     saveGame(updatedGame)
     gameRef.current = updatedGame
+    setChanged(hasChanges(updatedGame.id))
     setSaved(true)
     setTimeout(() => setSaved(false), 1500)
   }, [])
@@ -253,6 +260,31 @@ export default function GameWorkspacePage() {
     setupEngine(lastEntry.previousDefinition)
   }, [save, setupEngine, t])
 
+  const handleRestore = useCallback(() => {
+    const restored = restoreOriginal(gameId)
+    if (!restored) return
+    setGame(restored)
+    gameRef.current = restored
+    setMessages([])
+    setTitle(getDisplayTitle(restored.title))
+    setChanged(false)
+    setShowRestoreConfirm(false)
+    setShowMenu(false)
+    setupEngine(restored.definition)
+  }, [gameId, setupEngine])
+
+  const handleSaveAs = useCallback(() => {
+    const name = copyName.trim()
+    if (!name) return
+    const copy = saveAsCopy(gameId, name)
+    if (copy) {
+      setCopyName('')
+      setShowSaveAs(false)
+      setShowMenu(false)
+      router.push(`/games/${copy.id}`)
+    }
+  }, [gameId, copyName, router])
+
   const handlePlay = () => {
     const engine = engineRef.current
     if (!engine) return
@@ -359,13 +391,102 @@ export default function GameWorkspacePage() {
             </h2>
           )}
           {saved && <span className="saved-indicator">💾</span>}
-          <button
-            className="btn btn-secondary btn-sm"
-            onClick={() => router.push('/games')}
-            style={{ marginInlineStart: 'auto', padding: '6px 12px', fontSize: '0.85rem' }}
-          >
-            {isMobile ? '🏠' : `🏠 ${t('nav.myGames')}`}
-          </button>
+
+          <div style={{ marginInlineStart: 'auto', display: 'flex', gap: '6px', alignItems: 'center', position: 'relative' }}>
+            <button
+              onClick={() => setShowMenu(!showMenu)}
+              style={{
+                width: '32px',
+                height: '32px',
+                borderRadius: '8px',
+                border: '1px solid #dfe6e9',
+                background: showMenu ? '#6c5ce7' : '#f8f9ff',
+                color: showMenu ? '#fff' : '#636e72',
+                fontSize: '1rem',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              ⋯
+            </button>
+
+            {showMenu && (
+              <div
+                onClick={() => setShowMenu(false)}
+                style={{ position: 'fixed', inset: 0, zIndex: 49 }}
+              />
+            )}
+            {showMenu && (
+              <div style={{
+                position: 'absolute',
+                top: '100%',
+                insetInlineEnd: 0,
+                marginTop: '4px',
+                background: '#fff',
+                borderRadius: '12px',
+                boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+                padding: '6px',
+                zIndex: 50,
+                minWidth: '160px',
+                direction: 'rtl',
+              }}>
+                {changed && (
+                  <button
+                    onClick={() => { setShowRestoreConfirm(true); setShowMenu(false) }}
+                    style={{
+                      display: 'block',
+                      width: '100%',
+                      textAlign: 'right',
+                      padding: '8px 12px',
+                      border: 'none',
+                      borderRadius: '8px',
+                      background: 'transparent',
+                      cursor: 'pointer',
+                      fontSize: '0.85rem',
+                      color: '#d63031',
+                    }}
+                    onMouseOver={(e) => { e.currentTarget.style.background = '#ffeaea' }}
+                    onMouseOut={(e) => { e.currentTarget.style.background = 'transparent' }}
+                  >
+                    🔄 {t('save.restore')}
+                  </button>
+                )}
+                <button
+                  onClick={() => {
+                    setCopyName(getDisplayTitle(game?.title) + ' (2)')
+                    setShowSaveAs(true)
+                    setShowMenu(false)
+                  }}
+                  style={{
+                    display: 'block',
+                    width: '100%',
+                    textAlign: 'right',
+                    padding: '8px 12px',
+                    border: 'none',
+                    borderRadius: '8px',
+                    background: 'transparent',
+                    cursor: 'pointer',
+                    fontSize: '0.85rem',
+                    color: '#2d3436',
+                  }}
+                  onMouseOver={(e) => { e.currentTarget.style.background = '#f0f0f5' }}
+                  onMouseOut={(e) => { e.currentTarget.style.background = 'transparent' }}
+                >
+                  📋 {t('save.saveAs')}
+                </button>
+              </div>
+            )}
+
+            <button
+              className="btn btn-secondary btn-sm"
+              onClick={() => router.push('/games')}
+              style={{ padding: '6px 12px', fontSize: '0.85rem' }}
+            >
+              {isMobile ? '🏠' : `🏠 ${t('nav.myGames')}`}
+            </button>
+          </div>
         </div>
 
         <div style={{
@@ -389,6 +510,7 @@ export default function GameWorkspacePage() {
                 suggestions={suggestions}
                 onSend={handleSend}
                 disabled={busy}
+                templateId={game?.template}
               />
             </div>
           )}
@@ -414,6 +536,7 @@ export default function GameWorkspacePage() {
                 suggestions={suggestions}
                 onSend={handleSend}
                 disabled={busy}
+                templateId={game?.template}
               />
             </div>
           )}
@@ -462,6 +585,70 @@ export default function GameWorkspacePage() {
           </div>
         </div>
       </div>
+
+      {showRestoreConfirm && (
+        <div onClick={() => setShowRestoreConfirm(false)} style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)',
+          zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px',
+        }}>
+          <div onClick={(e) => e.stopPropagation()} style={{
+            background: '#fff', borderRadius: '16px', padding: '24px',
+            maxWidth: '340px', width: '100%', textAlign: 'center',
+          }}>
+            <p style={{ fontSize: '0.95rem', marginBottom: '20px', direction: 'rtl' }}>
+              {t('save.restoreConfirm')}
+            </p>
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+              <button className="btn btn-secondary btn-sm" onClick={() => setShowRestoreConfirm(false)}>
+                ✕
+              </button>
+              <button className="btn btn-danger btn-sm" onClick={handleRestore}>
+                🔄 {t('save.restore')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showSaveAs && (
+        <div onClick={() => setShowSaveAs(false)} style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)',
+          zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px',
+        }}>
+          <div onClick={(e) => e.stopPropagation()} style={{
+            background: '#fff', borderRadius: '16px', padding: '24px',
+            maxWidth: '340px', width: '100%',
+          }}>
+            <p style={{ fontSize: '0.95rem', marginBottom: '12px', direction: 'rtl', fontWeight: 600 }}>
+              {t('save.saveAsTitle')}
+            </p>
+            <input
+              value={copyName}
+              onChange={(e) => setCopyName(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') handleSaveAs() }}
+              autoFocus
+              dir="rtl"
+              style={{
+                width: '100%', padding: '10px 14px', borderRadius: '10px',
+                border: '2px solid #6c5ce7', fontSize: '0.95rem', outline: 'none',
+                marginBottom: '16px',
+              }}
+            />
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+              <button className="btn btn-secondary btn-sm" onClick={() => setShowSaveAs(false)}>
+                ✕
+              </button>
+              <button
+                className="btn btn-primary btn-sm"
+                onClick={handleSaveAs}
+                disabled={!copyName.trim()}
+              >
+                📋 {t('save.saveAs')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }

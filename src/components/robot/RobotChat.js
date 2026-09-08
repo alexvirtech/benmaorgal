@@ -1,13 +1,15 @@
 'use client'
 
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import VoicePrompt from '@/components/voice/VoicePrompt'
 import RobotBubble from '@/components/robot/RobotBubble'
+import ExamplesModal from '@/components/robot/ExamplesModal'
 import { useLang } from '@/i18n'
 
-export default function RobotChat({ messages, suggestions, onSend, disabled }) {
+export default function RobotChat({ messages, suggestions, onSend, disabled, templateId }) {
   const messagesEndRef = useRef(null)
   const { t, lang } = useLang()
+  const [showExamples, setShowExamples] = useState(false)
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -38,7 +40,36 @@ export default function RobotChat({ messages, suggestions, onSend, disabled }) {
       }}>
         <span style={{ fontSize: '1.4rem' }}>🤖</span>
         {t('nav.create')}
+        {templateId && (
+          <button
+            onClick={() => setShowExamples(true)}
+            style={{
+              marginInlineStart: 'auto',
+              background: 'rgba(255,255,255,0.2)',
+              border: '1px solid rgba(255,255,255,0.3)',
+              borderRadius: '14px',
+              padding: '4px 12px',
+              color: '#fff',
+              fontSize: '0.8rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'background 0.2s',
+            }}
+            onMouseOver={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.35)' }}
+            onMouseOut={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.2)' }}
+          >
+            💡 דוגמאות
+          </button>
+        )}
       </div>
+
+      {showExamples && templateId && (
+        <ExamplesModal
+          templateId={templateId}
+          onSelect={handleSubmit}
+          onClose={() => setShowExamples(false)}
+        />
+      )}
 
       <div style={{
         flex: 1,

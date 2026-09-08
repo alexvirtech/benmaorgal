@@ -55,6 +55,12 @@ export default {
   'games.delete': '🗑 מחק',
   'games.cancel': 'ביטול',
 
+  'save.restore': 'שחזר מקור',
+  'save.saveAs': 'שמור עותק',
+  'save.restoreConfirm': 'לשחזר את המשחק למצב המקורי? כל השינויים יימחקו.',
+  'save.saveAsTitle': 'שם לעותק:',
+  'save.saved': 'נשמר!',
+
   'tts.on': '🔊',
   'tts.off': '🔇',
 }

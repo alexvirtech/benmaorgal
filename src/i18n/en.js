@@ -55,6 +55,12 @@ export default {
   'games.delete': '🗑 Delete',
   'games.cancel': 'Cancel',
 
+  'save.restore': 'Restore Original',
+  'save.saveAs': 'Save Copy',
+  'save.restoreConfirm': 'Restore the game to its original state? All changes will be lost.',
+  'save.saveAsTitle': 'Name for the copy:',
+  'save.saved': 'Saved!',
+
   'tts.on': '🔊',
   'tts.off': '🔇',
 }
