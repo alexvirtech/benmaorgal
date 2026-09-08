@@ -11,6 +11,134 @@ const BACKGROUNDS = {
   night: { top: '#0f0f2e', bottom: '#1a1a3e', ground: '#2a2a2a', stars: true },
 }
 
+function drawThemeDecor(ctx, bgName) {
+  const G = GAME_HEIGHT - 40
+  switch (bgName) {
+    case 'city': {
+      const bldg = [
+        [30, 60, 120], [100, 40, 180], [150, 70, 100], [250, 50, 200],
+        [310, 80, 140], [420, 45, 170], [480, 65, 110], [560, 55, 190],
+        [630, 70, 130], [720, 50, 160],
+      ]
+      for (const [bx, bw, bh] of bldg) {
+        ctx.fillStyle = '#2a2a3a'
+        ctx.fillRect(bx, G - bh, bw, bh)
+        ctx.fillStyle = 'rgba(255,215,0,0.5)'
+        for (let wy = G - bh + 15; wy < G - 15; wy += 25) {
+          for (let wx = bx + 8; wx < bx + bw - 8; wx += 18) {
+            ctx.fillRect(wx, wy, 8, 10)
+          }
+        }
+      }
+      break
+    }
+    case 'forest': {
+      const treeX = [50, 150, 280, 400, 520, 650, 750]
+      for (const tx of treeX) {
+        ctx.fillStyle = '#5c3a1e'
+        ctx.fillRect(tx - 6, G - 50, 12, 50)
+        ctx.fillStyle = '#1a5c1a'
+        ctx.beginPath()
+        ctx.moveTo(tx, G - 110)
+        ctx.lineTo(tx - 28, G - 50)
+        ctx.lineTo(tx + 28, G - 50)
+        ctx.closePath()
+        ctx.fill()
+        ctx.beginPath()
+        ctx.moveTo(tx, G - 140)
+        ctx.lineTo(tx - 22, G - 90)
+        ctx.lineTo(tx + 22, G - 90)
+        ctx.closePath()
+        ctx.fill()
+      }
+      break
+    }
+    case 'ocean': {
+      for (let wy = G - 100; wy < G; wy += 30) {
+        ctx.fillStyle = `rgba(255,255,255,${0.08 + (wy - G + 100) * 0.001})`
+        ctx.beginPath()
+        ctx.moveTo(0, wy)
+        for (let wx = 0; wx <= GAME_WIDTH; wx += 40) {
+          ctx.quadraticCurveTo(wx + 10, wy - 8, wx + 20, wy)
+          ctx.quadraticCurveTo(wx + 30, wy + 8, wx + 40, wy)
+        }
+        ctx.lineTo(GAME_WIDTH, wy + 20)
+        ctx.lineTo(0, wy + 20)
+        ctx.closePath()
+        ctx.fill()
+      }
+      break
+    }
+    case 'desert': {
+      ctx.fillStyle = '#d4a350'
+      ctx.beginPath()
+      ctx.moveTo(0, G - 20)
+      ctx.quadraticCurveTo(200, G - 80, 400, G - 20)
+      ctx.quadraticCurveTo(600, G - 60, GAME_WIDTH, G - 20)
+      ctx.lineTo(GAME_WIDTH, G)
+      ctx.lineTo(0, G)
+      ctx.closePath()
+      ctx.fill()
+      ctx.fillStyle = '#2d8a3e'
+      ctx.fillRect(150, G - 70, 8, 30)
+      ctx.fillRect(140, G - 60, 8, 15)
+      ctx.fillRect(158, G - 55, 8, 12)
+      ctx.fillRect(600, G - 65, 8, 25)
+      ctx.fillRect(590, G - 55, 8, 12)
+      ctx.fillRect(608, G - 58, 8, 10)
+      break
+    }
+    case 'sky': {
+      ctx.fillStyle = 'rgba(255,255,255,0.6)'
+      const clouds = [[100, 80, 60], [300, 50, 45], [550, 100, 55], [700, 60, 40]]
+      for (const [cx, cy, r] of clouds) {
+        ctx.beginPath()
+        ctx.arc(cx, cy, r, 0, Math.PI * 2)
+        ctx.arc(cx + r * 0.7, cy - r * 0.2, r * 0.7, 0, Math.PI * 2)
+        ctx.arc(cx - r * 0.6, cy + r * 0.1, r * 0.6, 0, Math.PI * 2)
+        ctx.fill()
+      }
+      break
+    }
+    case 'grass': {
+      ctx.fillStyle = 'rgba(255,255,255,0.5)'
+      const cl = [[120, 70, 50], [450, 90, 40], [680, 60, 35]]
+      for (const [cx, cy, r] of cl) {
+        ctx.beginPath()
+        ctx.arc(cx, cy, r, 0, Math.PI * 2)
+        ctx.arc(cx + r * 0.6, cy - r * 0.15, r * 0.6, 0, Math.PI * 2)
+        ctx.fill()
+      }
+      break
+    }
+    case 'night': {
+      ctx.fillStyle = '#ffe066'
+      ctx.beginPath()
+      ctx.arc(650, 80, 30, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.fillStyle = '#0f0f2e'
+      ctx.beginPath()
+      ctx.arc(638, 72, 26, 0, Math.PI * 2)
+      ctx.fill()
+      break
+    }
+    case 'space': {
+      ctx.fillStyle = '#553388'
+      ctx.globalAlpha = 0.15
+      ctx.beginPath()
+      ctx.arc(600, 200, 80, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.globalAlpha = 0.1
+      ctx.fillStyle = '#886633'
+      ctx.beginPath()
+      ctx.arc(180, 120, 25, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.globalAlpha = 1
+      break
+    }
+  }
+}
+
 export function drawBackground(ctx, theme) {
   let bgName, groundColor
   if (typeof theme === 'object' && theme !== null) {
@@ -39,6 +167,8 @@ export function drawBackground(ctx, theme) {
       ctx.fill()
     }
   }
+
+  drawThemeDecor(ctx, bgName)
 
   const gColor = groundColor || bg.ground
   if (gColor) {

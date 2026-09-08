@@ -236,6 +236,7 @@ export class GameEngine {
       cancelAnimationFrame(this._animId)
       this._animId = null
     }
+    if (this.onStateChange) this.onStateChange({ ...this.state })
   }
 
   resume() {
