@@ -82,16 +82,19 @@ export const pongTemplate = {
       ball.vx = Math.abs(ball.vx)
       ball.x = 0
       engine.spawnParticles(ball.x + ball.width / 2, ball.y + ball.height / 2, '#aaaaff', 4, 2)
+      engine.playSound('bounce')
     }
     if (ball.x + ball.width >= GAME_WIDTH) {
       ball.vx = -Math.abs(ball.vx)
       ball.x = GAME_WIDTH - ball.width
       engine.spawnParticles(ball.x + ball.width / 2, ball.y + ball.height / 2, '#aaaaff', 4, 2)
+      engine.playSound('bounce')
     }
     if (ball.y <= HUD_H) {
       ball.vy = Math.abs(ball.vy)
       ball.y = HUD_H
       engine.spawnParticles(ball.x + ball.width / 2, HUD_H, '#aaaaff', 4, 2)
+      engine.playSound('bounce')
     }
 
     if (

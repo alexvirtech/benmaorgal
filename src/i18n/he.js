@@ -38,6 +38,8 @@ export default {
   'controls.continue': 'המשך',
   'controls.restart': 'מהתחלה',
   'controls.undo': 'בטל',
+  'controls.soundOn': 'הפעל צלילים',
+  'controls.soundOff': 'כבה צלילים',
 
   'game.win': '🎉 ניצחת! 🏆',
   'game.over': 'נגמר המשחק',

@@ -76,6 +76,7 @@ export const shooterTemplate = {
         glowSize: 10,
       })
       engine.spawnParticles(player.x + player.width / 2, player.y, '#ffaa00', 5, 2)
+      engine.playSound('shoot')
     } else {
       engine.set('fireTimer', fireTimer)
     }

@@ -2,7 +2,7 @@
 
 import { useLang } from '@/i18n'
 
-export default function GameControls({ gameState, onPlay, onPause, onRestart, onUndo, canUndo }) {
+export default function GameControls({ gameState, onPlay, onPause, onRestart, onUndo, canUndo, soundOn, onSoundToggle }) {
   const { t } = useLang()
   const status = gameState?.status || 'ready'
   const isPlaying = status === 'playing'
@@ -44,6 +44,15 @@ export default function GameControls({ gameState, onPlay, onPause, onRestart, on
           ↩ {t('controls.undo')}
         </button>
       )}
+
+      <button
+        className="btn btn-secondary btn-sm"
+        onClick={onSoundToggle}
+        title={soundOn ? t('controls.soundOff') : t('controls.soundOn')}
+        style={{ fontSize: '1rem', padding: '4px 10px' }}
+      >
+        {soundOn ? '🔊' : '🔇'}
+      </button>
 
       {gameState && (
         <div style={{

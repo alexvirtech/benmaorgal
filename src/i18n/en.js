@@ -38,6 +38,8 @@ export default {
   'controls.continue': 'Continue',
   'controls.restart': 'Restart',
   'controls.undo': 'Undo',
+  'controls.soundOn': 'Sound on',
+  'controls.soundOff': 'Sound off',
 
   'game.win': '🎉 YOU WIN! 🏆',
   'game.over': 'GAME OVER',

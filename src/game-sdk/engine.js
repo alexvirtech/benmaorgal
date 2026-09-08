@@ -115,11 +115,13 @@ export class GameEngine {
   addScore(points) {
     this.state.score += points
     this.emit('score', this.state.score)
+    this.playSound('collect')
   }
 
   loseLife() {
     this.state.lives--
     this.emit('life-lost', this.state.lives)
+    this.playSound('hurt')
     if (this.state.lives <= 0) {
       this.lose()
     }
@@ -129,12 +131,18 @@ export class GameEngine {
     this.state.status = 'won'
     this.state.isWon = true
     this.emit('win', this.state)
+    this.playSound('win')
   }
 
   lose() {
     this.state.status = 'lost'
     this.state.isLost = true
     this.emit('lose', this.state)
+    this.playSound('lose')
+  }
+
+  playSound(name) {
+    if (this.sound) this.sound.play(name)
   }
 
   spawnParticles(x, y, color, count = 8, spread = 3) {

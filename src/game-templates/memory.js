@@ -105,6 +105,7 @@ export const memoryTemplate = {
       if (px >= card.x && px <= card.x + card.w && py >= card.y && py <= card.y + card.h) {
         card.revealed = true
         selected.push(card.id)
+        engine.playSound('click')
 
         if (selected.length === 2) {
           const [a, b] = selected

@@ -100,6 +100,7 @@ export const clickerTemplate = {
         engine.set('combo', combo)
         const points = 1 + Math.floor(combo / 5)
         engine.addScore(points)
+        engine.playSound('click')
         engine.spawnParticles(
           target.x + target.size / 2, target.y + target.size / 2, '#ffd700', 18, 5
         )

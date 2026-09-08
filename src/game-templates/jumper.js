@@ -64,6 +64,7 @@ export const jumperTemplate = {
       player.vy = -580
       player.grounded = false
       engine.spawnParticles(player.x + player.width / 2, GROUND_Y, '#8B6914', 10, 2)
+      engine.playSound('jump')
     }
 
     player.vy += GRAVITY * dt

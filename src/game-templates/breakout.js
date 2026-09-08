@@ -112,6 +112,7 @@ export const breakoutTemplate = {
       ball.vy = Math.abs(ball.vy)
       ball.y = HUD_H
       engine.spawnParticles(ball.x + ball.width / 2, HUD_H, '#aaaaff', 3, 2)
+      engine.playSound('bounce')
     }
 
     if (
@@ -125,6 +126,7 @@ export const breakoutTemplate = {
       const hit = (ball.x + ball.width / 2 - player.x) / player.width
       ball.vx = (hit - 0.5) * 8
       engine.spawnParticles(ball.x + ball.width / 2, player.y, '#ecf0f1', 8, 2)
+      engine.playSound('bounce')
     }
 
     if (ball.y > GAME_HEIGHT + 20) {

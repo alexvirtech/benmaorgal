@@ -62,6 +62,7 @@ export const flappyTemplate = {
     if (input.actions.jump || input.pointer.clicked) {
       player.vy = FLAP_POWER
       engine.spawnParticles(player.x, player.y + player.height / 2, '#ffffff', 8, 2.5)
+      engine.playSound('jump')
     }
 
     player.vy += GRAVITY * dt

@@ -136,6 +136,7 @@ export const whackTemplate = {
           engine.set('combo', combo)
           const points = 1 + Math.floor(combo / 4)
           engine.addScore(points)
+          engine.playSound('click')
           engine.screenShake(5, 0.1)
           engine.spawnParticles(hole.x + HOLE_W / 2, my + MOLE_SIZE / 2, '#ffd700', 16, 5)
           engine.spawnFloatingText(hole.x + HOLE_W / 2, my, `+${points}`)

@@ -10,6 +10,7 @@ import { InputManager } from '@/game-sdk/input'
 import { getTemplate, getTemplateMetadata } from '@/game-templates/index'
 import { routePrompt } from '@/ai/BrainRouter'
 import { getGame, saveGame, getDisplayTitle, restoreOriginal, saveAsCopy, hasChanges } from '@/repositories/localGameRepository'
+import { gameSound } from '@/game-sdk/sound'
 import { useLang } from '@/i18n'
 
 export default function GameWorkspacePage() {
@@ -32,6 +33,7 @@ export default function GameWorkspacePage() {
   const [showSaveAs, setShowSaveAs] = useState(false)
   const [copyName, setCopyName] = useState('')
   const [changed, setChanged] = useState(false)
+  const [soundOn, setSoundOn] = useState(false)
 
   const canvasRef = useRef(null)
   const engineRef = useRef(null)
@@ -52,6 +54,15 @@ export default function GameWorkspacePage() {
   useEffect(() => {
     setChatOpen(!isMobile)
   }, [isMobile])
+
+  useEffect(() => {
+    try {
+      const v = localStorage.getItem('benmaorgal-sound')
+      const on = v === 'on'
+      setSoundOn(on)
+      gameSound.enabled = on
+    } catch {}
+  }, [])
 
   useEffect(() => {
     const g = getGame(gameId)
@@ -101,6 +112,7 @@ export default function GameWorkspacePage() {
     engine.setDefinition(def)
     engine.setTemplate(template)
     engine.state.lives = def.rules?.startingLives || 3
+    engine.sound = gameSound
     engine.onStateChange = (s) => setGameState(s)
 
     template.setup(engine, def)
@@ -296,6 +308,13 @@ export default function GameWorkspacePage() {
 
   const handlePause = () => { engineRef.current?.pause() }
   const handleRestart = () => { engineRef.current?.restart() }
+
+  const handleSoundToggle = () => {
+    const next = !soundOn
+    setSoundOn(next)
+    gameSound.enabled = next
+    try { localStorage.setItem('benmaorgal-sound', next ? 'on' : 'off') } catch {}
+  }
 
   const handleTitleChange = () => {
     if (!editingTitle) { setEditingTitle(true); return }
@@ -615,6 +634,8 @@ export default function GameWorkspacePage() {
                 onRestart={handleRestart}
                 onUndo={handleUndo}
                 canUndo={game?.history?.length > 0}
+                soundOn={soundOn}
+                onSoundToggle={handleSoundToggle}
               />
             </div>
           </div>
