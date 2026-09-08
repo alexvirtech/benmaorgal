@@ -17,6 +17,7 @@ export function interpretPrompt(prompt, currentGame = null) {
     return {
       intent: 'UNKNOWN',
       robotMessage: "Hmm... 🤖\n\nI didn't hear anything! Try telling me what game you want to make.",
+      robotMessageHe: 'אמממ... 🤖\n\nלא שמעתי כלום! נסה לספר לי מה לשנות.',
     }
   }
 
@@ -32,12 +33,14 @@ export function interpretPrompt(prompt, currentGame = null) {
     return {
       intent: 'UNKNOWN',
       robotMessage: "Hmm... 🤖\n\nI'm not sure how to do that yet.\n\nTry:\n⭐ \"Make me faster\"\n💣 \"Add bombs\"\n🚀 \"Add spaceships\"\n❤️ \"Give me 5 lives\"\n🌌 \"Make the background space\"",
+      robotMessageHe: 'אמממ... 🤖\n\nאני עדיין לא יודע לעשות את זה.\n\nנסה:\n⭐ "תעשה מהר יותר"\n💣 "תוסיף פצצות"\n🚀 "תוסיף חלליות"\n❤️ "תן לי 5 חיים"\n🌌 "רקע של חלל"',
     }
   }
 
   return {
     intent: 'UNKNOWN',
     robotMessage: "Hmm... 🤖\n\nI'm not sure what game you mean.\n\nTry something like:\n⭐ \"Make a cat catch stars\"\n🚀 \"Make a spaceship shoot aliens\"\n🐍 \"Make a snake game\"",
+    robotMessageHe: 'אמממ... 🤖\n\nלא הבנתי איזה משחק.\n\nנסה משהו כמו:\n⭐ "תעשה משחק שחתול תופס כוכבים"\n🚀 "תעשה משחק שחללית יורה בחייזרים"\n🐍 "תעשה משחק נחש"',
   }
 }
 
@@ -95,6 +98,7 @@ function tryCreateGame(lower, prompt) {
     title,
     definition: baseDef,
     robotMessage: `Great idea! ${meta?.icon || '🎮'}\n\nI made "${title}" for you! ${playerSprite}\n\nPress ▶ Play to try it!`,
+    robotMessageHe: `רעיון מעולה! ${meta?.icon || '🎮'}\n\nיצרתי לך את "${title}"! ${playerSprite}\n\nלחץ ▶ שחק כדי לנסות!`,
     suggestions: meta?.suggestions || [],
   }
 }
@@ -120,6 +124,7 @@ function tryModification(lower, prompt, currentDef) {
       return {
         intent: 'ERROR',
         robotMessage: `Oops! 🤖🔧 Something went wrong: ${result.error}`,
+        robotMessageHe: 'אופס! 🤖🔧 משהו השתבש',
       }
     }
 
@@ -127,11 +132,16 @@ function tryModification(lower, prompt, currentDef) {
       ? pattern.description(match)
       : pattern.description
 
+    const descHe = typeof pattern.descriptionHe === 'function'
+      ? pattern.descriptionHe(match)
+      : pattern.descriptionHe
+
     return {
       intent: 'MODIFY_GAME',
       actions: [action],
       definition: result.definition,
       robotMessage: `Done! ${desc}`,
+      robotMessageHe: descHe || null,
     }
   }
 

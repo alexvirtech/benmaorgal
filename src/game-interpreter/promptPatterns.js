@@ -113,31 +113,37 @@ export const MODIFICATION_PATTERNS = [
     match: /(?:make|set)\s+(?:it|the\s+\w+|player|cat|dog|frog|car|spaceship|robot)?\s*faster/i,
     action: () => ({ type: 'SET_PROPERTY', path: 'player.speed', value: null, delta: 2 }),
     description: 'Made it faster! 💨',
+    descriptionHe: 'עשיתי מהר יותר! 💨',
   },
   {
     match: /(?:make|set)\s+(?:it|the\s+\w+|player)?\s*slower/i,
     action: () => ({ type: 'SET_PROPERTY', path: 'player.speed', value: null, delta: -2 }),
     description: 'Made it slower! 🐌',
+    descriptionHe: 'עשיתי לאט יותר! 🐌',
   },
   {
     match: /(?:give\s+me|i\s+want|set)\s+(\d+)\s+lives?/i,
     action: (m) => ({ type: 'SET_PROPERTY', path: 'rules.startingLives', value: parseInt(m[1]) }),
     description: (m) => `You now have ${m[1]} lives! ❤️`,
+    descriptionHe: (m) => `יש לך ${m[1]} חיים! ❤️`,
   },
   {
     match: /add\s+(?:a\s+)?(?:more\s+)?life/i,
     action: () => ({ type: 'SET_PROPERTY', path: 'rules.startingLives', value: null, delta: 1 }),
     description: 'Added an extra life! ❤️',
+    descriptionHe: 'הוספתי חיים! ❤️',
   },
   {
     match: /(?:make\s+it|make\s+the\s+game)\s+harder/i,
     action: () => ({ type: 'SET_DIFFICULTY', difficulty: 'hard' }),
     description: 'Made it harder! ⚡ Good luck!',
+    descriptionHe: 'עשיתי יותר קשה! ⚡ בהצלחה!',
   },
   {
     match: /(?:make\s+it|make\s+the\s+game)\s+easier/i,
     action: () => ({ type: 'SET_DIFFICULTY', difficulty: 'easy' }),
     description: 'Made it easier! 😊',
+    descriptionHe: 'עשיתי יותר קל! 😊',
   },
   {
     match: /add\s+(?:dangerous\s+)?bombs?/i,
@@ -146,16 +152,19 @@ export const MODIFICATION_PATTERNS = [
       object: { role: 'hazard', type: 'bomb', speed: 3, spawnRate: 2000, effect: 'loseLife' },
     }),
     description: 'Added bombs! 💣 Watch out!',
+    descriptionHe: 'הוספתי פצצות! 💣 תיזהר!',
   },
   {
     match: /(?:remove|no)\s+bombs?/i,
     action: () => ({ type: 'REMOVE_OBJECT', objectType: 'bomb' }),
     description: 'Removed the bombs! 😌',
+    descriptionHe: 'הורדתי את הפצצות! 😌',
   },
   {
     match: /(?:make|change|set)\s+(?:the\s+)?background\s+(?:to\s+)?(\w+)/i,
     action: (m) => ({ type: 'CHANGE_THEME', theme: { background: m[1].toLowerCase() } }),
     description: (m) => `Changed the background to ${m[1]}! 🎨`,
+    descriptionHe: (m) => `שיניתי רקע ל-${m[1]}! 🎨`,
   },
   {
     match: /(?:make|change|set)\s+(?:the\s+)?ground\s+(?:color\s+)?(?:to\s+)?(?:a\s+)?([\w\s]+?)$/i,
@@ -174,26 +183,31 @@ export const MODIFICATION_PATTERNS = [
       return { type: 'CHANGE_THEME', theme: { groundColor: color } }
     },
     description: (m) => `Changed the ground to ${m[1].trim()}! 🎨`,
+    descriptionHe: (m) => `שיניתי את הקרקע ל-${m[1].trim()}! 🎨`,
   },
   {
     match: /(?:change|make)\s+(?:the\s+)?(?:player|character)\s+(?:to\s+)?(?:a\s+)?(\w+)/i,
     action: (m) => ({ type: 'CHANGE_PLAYER', player: { type: m[1].toLowerCase() } }),
     description: (m) => `Changed player to ${m[1]}! 🎭`,
+    descriptionHe: (m) => `שיניתי שחקן ל-${m[1]}! 🎭`,
   },
   {
     match: /(?:set|change)\s+(?:target\s+)?score\s+(?:to\s+)?(\d+)/i,
     action: (m) => ({ type: 'SET_PROPERTY', path: 'rules.targetScore', value: parseInt(m[1]) }),
     description: (m) => `Target score set to ${m[1]}! 🎯`,
+    descriptionHe: (m) => `ניקוד יעד: ${m[1]}! 🎯`,
   },
   {
     match: /(?:make|set)\s+(?:it\s+)?(?:the\s+\w+\s+)?bigger/i,
     action: () => ({ type: 'SET_PROPERTY', path: 'player.size', value: null, delta: 15 }),
     description: 'Made the player bigger! 🔍',
+    descriptionHe: 'הגדלתי את השחקן! 🔍',
   },
   {
     match: /(?:make|set)\s+(?:it\s+)?(?:the\s+\w+\s+)?smaller/i,
     action: () => ({ type: 'SET_PROPERTY', path: 'player.size', value: null, delta: -10 }),
     description: 'Made the player smaller! 🔬',
+    descriptionHe: 'הקטנתי את השחקן! 🔬',
   },
   {
     match: /add\s+(?:some\s+|a\s+few\s+|more\s+)?(\w+)/i,
@@ -216,6 +230,7 @@ export const MODIFICATION_PATTERNS = [
       }
     },
     description: (m) => `Added ${m[1]} to the background! ✨`,
+    descriptionHe: (m) => `הוספתי ${m[1]} לרקע! ✨`,
   },
 ]
 

@@ -560,17 +560,52 @@ export default function GameWorkspacePage() {
                 overflow: 'hidden',
               }}
             >
-              <canvas
-                ref={canvasRef}
-                style={{
-                  borderRadius: '12px',
-                  boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
-                  maxWidth: '100%',
-                  maxHeight: '100%',
-                  cursor: 'pointer',
-                }}
-                tabIndex={0}
-              />
+              <div style={{ position: 'relative', display: 'inline-block' }}>
+                <canvas
+                  ref={canvasRef}
+                  style={{
+                    borderRadius: '12px',
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+                    maxWidth: '100%',
+                    maxHeight: '100%',
+                    cursor: 'pointer',
+                    display: 'block',
+                  }}
+                  tabIndex={0}
+                />
+                {gameState?.status === 'paused' && (
+                  <div
+                    onClick={handlePlay}
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      background: 'rgba(0,0,0,0.35)',
+                      borderRadius: '12px',
+                      cursor: 'pointer',
+                      zIndex: 5,
+                    }}
+                  >
+                    <div style={{
+                      width: '80px',
+                      height: '80px',
+                      borderRadius: '50%',
+                      background: 'rgba(255,255,255,0.9)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '2rem',
+                      fontWeight: 700,
+                      color: '#6c5ce7',
+                      boxShadow: '0 4px 20px rgba(0,0,0,0.25)',
+                    }}>
+                      ▶
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
             <div style={{ padding: '0 12px 8px' }}>
               <GameControls

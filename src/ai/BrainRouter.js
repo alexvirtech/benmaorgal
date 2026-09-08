@@ -62,7 +62,7 @@ export async function routePrompt(prompt, currentGame = null, mode = 'modify') {
       if (localResult.intent !== 'UNKNOWN') {
         return {
           ...localResult,
-          robotMessageHe: hebrewMatch.responseHe || localResult.robotMessage,
+          robotMessageHe: hebrewMatch.responseHe || localResult.robotMessageHe || 'בוצע! ✨',
           source: 'phrasebook+local',
         }
       }
@@ -73,7 +73,7 @@ export async function routePrompt(prompt, currentGame = null, mode = 'modify') {
   if (localResult.intent !== 'UNKNOWN') {
     return {
       ...localResult,
-      robotMessageHe: localResult.robotMessage,
+      robotMessageHe: localResult.robotMessageHe || localResult.robotMessage,
       source: 'local',
     }
   }

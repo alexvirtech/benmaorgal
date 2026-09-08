@@ -109,24 +109,28 @@ const MODIFICATION_PATTERNS = [
     match: /(?:יותר\s+מהר|מהר\s+יותר|תעשה\s+(?:אותי\s+|שאני\s+|יותר\s+|ש(?:זה\s+)?(?:יהיה\s+)?)מהר|שירוץ\s+מהר|תגביר\s+מהירות)/,
     english: 'make the player faster',
     action: { type: 'SET_PROPERTY', path: 'player.speed', delta: 2 },
+    responseHe: 'עשיתי מהר יותר! 💨',
   },
   // Speed slower
   {
     match: /(?:יותר\s+לאט|לאט\s+יותר|תעשה\s+(?:אותי\s+|שאני\s+|יותר\s+|ש(?:זה\s+)?(?:יהיה\s+)?)לאט|שילך\s+לאט|תוריד\s+מהירות)/,
     english: 'make the player slower',
     action: { type: 'SET_PROPERTY', path: 'player.speed', delta: -2 },
+    responseHe: 'עשיתי לאט יותר! 🐌',
   },
   // Remove bombs — must be before add bombs
   {
     match: /(?:תוריד\s+(?:את\s+)?(?:ה)?פצצות|בלי\s+פצצות|תמחק\s+(?:את\s+)?(?:ה)?פצצות|תסיר\s+(?:את\s+)?(?:ה)?פצצות)/,
     english: 'remove bombs',
     action: { type: 'REMOVE_OBJECT', objectType: 'bomb' },
+    responseHe: 'הורדתי את הפצצות! 😌',
   },
   // Add bombs
   {
     match: /(?:תוסיף\s+פצצות|שיהיו\s+פצצות|תעשה\s+פצצות|^פצצות$)/,
     english: 'add bombs',
     action: { type: 'ADD_OBJECT', object: { role: 'hazard', type: 'bomb', speed: 3, spawnRate: 2000, effect: 'loseLife' } },
+    responseHe: 'הוספתי פצצות! 💣 תיזהר!',
   },
   // N lives (specific number)
   {
@@ -137,6 +141,7 @@ const MODIFICATION_PATTERNS = [
       return {
         english: `give me ${n} lives`,
         action: { type: 'SET_PROPERTY', path: 'rules.startingLives', value: n },
+        responseHe: `יש לך ${n} חיים! ❤️`,
       }
     },
   },
@@ -145,30 +150,35 @@ const MODIFICATION_PATTERNS = [
     match: /(?:עוד\s+חיים|תוסיף\s+(?:לי\s+)?חיים|חיים?\s+נוספים|עוד\s+חיי)/,
     english: 'add a life',
     action: { type: 'SET_PROPERTY', path: 'rules.startingLives', delta: 1 },
+    responseHe: 'הוספתי חיים! ❤️',
   },
   // Harder
   {
     match: /(?:יותר\s+קשה|תעשה\s+(?:ש(?:יהיה|זה\s+יהיה)\s+)?קשה|קשה\s+יותר)/,
     english: 'make it harder',
     action: { type: 'SET_DIFFICULTY', difficulty: 'hard' },
+    responseHe: 'עשיתי יותר קשה! ⚡ בהצלחה!',
   },
   // Easier
   {
     match: /(?:יותר\s+קל|תעשה\s+(?:ש(?:יהיה|זה\s+יהיה)\s+)?קל|קל\s+יותר)/,
     english: 'make it easier',
     action: { type: 'SET_DIFFICULTY', difficulty: 'easy' },
+    responseHe: 'עשיתי יותר קל! 😊',
   },
   // Bigger
   {
     match: /(?:יותר\s+גדול|גדול\s+יותר|תעשה\s+(?:אותי\s+)?גדול|תגדיל\s+(?:אותי|את\s+השחקן))/,
     english: 'make the player bigger',
     action: { type: 'SET_PROPERTY', path: 'player.size', delta: 15 },
+    responseHe: 'הגדלתי את השחקן! 🔍',
   },
   // Smaller
   {
     match: /(?:יותר\s+קטן|קטן\s+יותר|תעשה\s+(?:אותי\s+)?קטן|תקטין\s+(?:אותי|את\s+השחקן))/,
     english: 'make the player smaller',
     action: { type: 'SET_PROPERTY', path: 'player.size', delta: -10 },
+    responseHe: 'הקטנתי את השחקן! 🔬',
   },
   // Background
   {
@@ -180,6 +190,7 @@ const MODIFICATION_PATTERNS = [
       return {
         english: `make the background ${bg}`,
         action: { type: 'CHANGE_THEME', theme: { background: bg } },
+        responseHe: `שיניתי רקע ל${raw}! 🎨`,
       }
     },
   },
@@ -193,6 +204,7 @@ const MODIFICATION_PATTERNS = [
       return {
         english: `change the player to ${char}`,
         action: { type: 'CHANGE_PLAYER', player: { type: char } },
+        responseHe: `שיניתי שחקן ל${raw}! 🎭`,
       }
     },
   },
@@ -206,6 +218,7 @@ const MODIFICATION_PATTERNS = [
       return {
         english: `set target score to ${n}`,
         action: { type: 'SET_PROPERTY', path: 'rules.targetScore', value: n },
+        responseHe: `ניקוד יעד: ${n}! 🎯`,
       }
     },
   },
@@ -274,7 +287,7 @@ export function matchHebrew(text) {
       const result = pattern.handler(m)
       if (result) return result
     } else {
-      return { english: pattern.english, action: pattern.action }
+      return { english: pattern.english, action: pattern.action, responseHe: pattern.responseHe }
     }
   }
 
