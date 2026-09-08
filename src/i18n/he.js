@@ -61,6 +61,4 @@ export default {
   'save.saveAsTitle': 'שם לעותק:',
   'save.saved': 'נשמר!',
 
-  'tts.on': '🔊',
-  'tts.off': '🔇',
 }

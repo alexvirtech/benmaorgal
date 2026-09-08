@@ -87,7 +87,7 @@ export default function RobotChat({ messages, suggestions, onSend, disabled, tem
             flexDirection: msg.role === 'user' ? 'row-reverse' : 'row',
           }}>
             {msg.role === 'robot' ? (
-              <RobotBubble text={msg.textHe || msg.text} lang={lang} />
+              <RobotBubble text={msg.textHe || msg.text} />
             ) : (
               <>
                 <span style={{ fontSize: '1.5rem', flexShrink: 0 }}>👦</span>

@@ -61,6 +61,4 @@ export default {
   'save.saveAsTitle': 'Name for the copy:',
   'save.saved': 'Saved!',
 
-  'tts.on': '🔊',
-  'tts.off': '🔇',
 }
