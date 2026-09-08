@@ -11,6 +11,7 @@ export class InputManager {
     }
     this.pointer = { x: 0, y: 0, down: false, clicked: false }
     this._clickedThisFrame = false
+    this._arrowQueue = []
     this._boundKeyDown = null
     this._boundKeyUp = null
     this._boundPointerDown = null
@@ -26,6 +27,10 @@ export class InputManager {
       this.keys[e.code] = true
       if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) {
         e.preventDefault()
+      }
+      const arrowMap = { ArrowLeft: 'left', ArrowRight: 'right', ArrowUp: 'up', ArrowDown: 'down' }
+      if (arrowMap[e.code] && this._arrowQueue.length < 4) {
+        this._arrowQueue.push(arrowMap[e.code])
       }
     }
     this._boundKeyUp = (e) => {
@@ -70,6 +75,12 @@ export class InputManager {
     this.actions.fire = this.keys['Space'] || this.keys['KeyX'] || false
     this.pointer.clicked = this._clickedThisFrame
     this._clickedThisFrame = false
+  }
+
+  drainArrows() {
+    const q = this._arrowQueue
+    this._arrowQueue = []
+    return q
   }
 
   setAction(action, value) {

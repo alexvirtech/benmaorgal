@@ -42,9 +42,9 @@ export const snakeTemplate = {
       { x: startX - 2, y: startY },
     ])
     engine.set('dir', { x: 1, y: 0 })
-    engine.set('nextDir', { x: 1, y: 0 })
+    engine.set('dirQueue', [])
     engine.set('moveTimer', 0)
-    engine.set('moveInterval', Math.max(0.06, 0.55 - (def.player.speed || 3) * 0.07))
+    engine.set('moveInterval', Math.max(0.1, 0.7 - (def.player.speed || 3) * 0.07))
     engine.state.lives = def.rules.startingLives
     engine.set('targetScore', def.rules.targetScore)
     placeFood(engine)
@@ -52,12 +52,16 @@ export const snakeTemplate = {
 
   update(engine, dt) {
     const input = engine.input
-    const nd = engine.get('nextDir')
-
-    if (input.actions.left && nd.x !== 1) engine.set('nextDir', { x: -1, y: 0 })
-    else if (input.actions.right && nd.x !== -1) engine.set('nextDir', { x: 1, y: 0 })
-    else if (input.actions.up && nd.y !== 1) engine.set('nextDir', { x: 0, y: -1 })
-    else if (input.actions.down && nd.y !== -1) engine.set('nextDir', { x: 0, y: 1 })
+    const queue = engine.get('dirQueue')
+    const arrows = input.drainArrows()
+    for (const arrow of arrows) {
+      const last = queue.length > 0 ? queue[queue.length - 1] : engine.get('dir')
+      if (arrow === 'left' && last.x !== 1) queue.push({ x: -1, y: 0 })
+      else if (arrow === 'right' && last.x !== -1) queue.push({ x: 1, y: 0 })
+      else if (arrow === 'up' && last.y !== 1) queue.push({ x: 0, y: -1 })
+      else if (arrow === 'down' && last.y !== -1) queue.push({ x: 0, y: 1 })
+    }
+    if (queue.length > 3) queue.splice(0, queue.length - 3)
 
     const timer = engine.get('moveTimer') + dt
     const interval = engine.get('moveInterval')
@@ -68,7 +72,7 @@ export const snakeTemplate = {
     engine.set('moveTimer', 0)
 
     const snake = engine.get('snake')
-    const d = engine.get('nextDir')
+    const d = queue.length > 0 ? queue.shift() : engine.get('dir')
     engine.set('dir', { ...d })
 
     const head = { x: snake[0].x + d.x, y: snake[0].y + d.y }
