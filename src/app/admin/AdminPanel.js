@@ -11,6 +11,7 @@ export default function AdminPanel({ clientId }) {
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
   const [gsiReady, setGsiReady] = useState(false)
+  const [kvOk, setKvOk] = useState(true)
   const btnRef = useRef(null)
 
   const fetchStatus = useCallback(async (tok) => {
@@ -28,6 +29,7 @@ export default function AdminPanel({ clientId }) {
       setAiOn(data.enabled)
       setCalls(data.calls)
       setUser(data.email)
+      setKvOk(data.kv !== false)
       setError(null)
     } catch (e) {
       setError(e.message)
@@ -68,6 +70,8 @@ export default function AdminPanel({ clientId }) {
         const data = await res.json()
         setAiOn(data.enabled)
         setCalls(data.calls)
+      } else if (res.status === 503) {
+        setError('KV store not configured — cannot toggle')
       } else {
         setError('Toggle failed')
       }
@@ -119,6 +123,10 @@ export default function AdminPanel({ clientId }) {
           {user && (
             <div style={sx.panel}>
               <p style={sx.email}>{user}</p>
+
+              {!kvOk && (
+                <p style={sx.warn}>KV store not configured — set KV_REST_API_URL and KV_REST_API_TOKEN in Vercel</p>
+              )}
 
               <div style={sx.row}>
                 <span>AI Mode</span>
@@ -177,6 +185,7 @@ const sx = {
   center: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 },
   hint: { margin: 0, color: '#636e72', fontSize: '0.95rem' },
   err: { color: '#d63031', fontSize: '0.9rem', margin: '12px 0' },
+  warn: { color: '#e17055', fontSize: '0.8rem', margin: 0, background: '#ffeaa7', padding: '8px 12px', borderRadius: 8 },
   panel: { display: 'flex', flexDirection: 'column', gap: 16 },
   email: { margin: 0, fontSize: '0.85rem', color: '#636e72' },
   row: {

@@ -1,11 +1,13 @@
 import { NextResponse } from 'next/server'
-import { getAiState, setAiState, getGlobalCount } from '@/ai/state'
+import { getAiState, setAiState, getGlobalCount, aiEnabled } from '@/ai/state'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL
+
+const kvReady = () => !!(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN)
 
 async function verifyGoogleToken(idToken) {
   try {
@@ -34,17 +36,27 @@ async function authorize(req) {
 export async function GET(req) {
   const info = await authorize(req)
   if (!info) return NextResponse.json({ error: 'forbidden' }, { status: 403 })
-  const enabled = await getAiState()
-  const calls = await getGlobalCount()
-  return NextResponse.json({ enabled, calls, email: info.email })
+  if (!kvReady()) {
+    return NextResponse.json({ enabled: false, calls: 0, email: info.email, kv: false })
+  }
+  try {
+    const enabled = await getAiState()
+    const calls = await getGlobalCount()
+    return NextResponse.json({ enabled, calls, email: info.email, kv: true })
+  } catch {
+    return NextResponse.json({ enabled: false, calls: 0, email: info.email, kv: false })
+  }
 }
 
 export async function POST(req) {
   const info = await authorize(req)
   if (!info) return NextResponse.json({ error: 'forbidden' }, { status: 403 })
+  if (!kvReady()) {
+    return NextResponse.json({ error: 'KV not configured' }, { status: 503 })
+  }
   const body = await req.json()
   await setAiState(!!body.enabled)
   const enabled = await getAiState()
   const calls = await getGlobalCount()
-  return NextResponse.json({ enabled, calls, email: info.email })
+  return NextResponse.json({ enabled, calls, email: info.email, kv: true })
 }
