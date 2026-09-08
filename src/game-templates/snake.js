@@ -25,7 +25,7 @@ export const snakeTemplate = {
       template: 'snake',
       title: 'Super Snake',
       theme: { background: 'grass' },
-      player: { type: 'snake', size: CELL, speed: 5 },
+      player: { type: 'snake', size: CELL, speed: 3 },
       objects: [
         { id: 'food', role: 'collectible', type: 'apple', points: 1 },
       ],
@@ -44,7 +44,7 @@ export const snakeTemplate = {
     engine.set('dir', { x: 1, y: 0 })
     engine.set('nextDir', { x: 1, y: 0 })
     engine.set('moveTimer', 0)
-    engine.set('moveInterval', 0.12)
+    engine.set('moveInterval', Math.max(0.06, 0.55 - (def.player.speed || 3) * 0.07))
     engine.state.lives = def.rules.startingLives
     engine.set('targetScore', def.rules.targetScore)
     placeFood(engine)
@@ -52,12 +52,12 @@ export const snakeTemplate = {
 
   update(engine, dt) {
     const input = engine.input
-    const dir = engine.get('dir')
+    const nd = engine.get('nextDir')
 
-    if (input.actions.left && dir.x !== 1) engine.set('nextDir', { x: -1, y: 0 })
-    else if (input.actions.right && dir.x !== -1) engine.set('nextDir', { x: 1, y: 0 })
-    else if (input.actions.up && dir.y !== 1) engine.set('nextDir', { x: 0, y: -1 })
-    else if (input.actions.down && dir.y !== -1) engine.set('nextDir', { x: 0, y: 1 })
+    if (input.actions.left && nd.x !== 1) engine.set('nextDir', { x: -1, y: 0 })
+    else if (input.actions.right && nd.x !== -1) engine.set('nextDir', { x: 1, y: 0 })
+    else if (input.actions.up && nd.y !== 1) engine.set('nextDir', { x: 0, y: -1 })
+    else if (input.actions.down && nd.y !== -1) engine.set('nextDir', { x: 0, y: 1 })
 
     const timer = engine.get('moveTimer') + dt
     const interval = engine.get('moveInterval')
@@ -117,7 +117,7 @@ export const snakeTemplate = {
         '+1'
       )
       placeFood(engine)
-      const newInterval = Math.max(0.05, engine.get('moveInterval') - 0.003)
+      const newInterval = Math.max(0.08, engine.get('moveInterval') - 0.002)
       engine.set('moveInterval', newInterval)
     } else {
       engine.spawnTrail(tailX, tailY, '#2ecc71', 3)
