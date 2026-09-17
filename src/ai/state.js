@@ -17,7 +17,8 @@ async function kv(path, method = 'GET', body) {
     cache: 'no-store',
   })
   if (!r.ok) throw new Error(`kv ${r.status}`)
-  return (await r.json()).result
+  const json = await r.json()
+  return Array.isArray(json) ? json : json.result
 }
 
 export async function getAiState() {
