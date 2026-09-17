@@ -4,11 +4,14 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useLang } from '@/i18n'
+import AiToggle from './AiToggle'
+import { useAiStatus } from './AiStatusProvider'
 
 export default function Navigation() {
   const pathname = usePathname()
   const [menuOpen, setMenuOpen] = useState(false)
   const { lang, setLang, t } = useLang()
+  const { aiEnabled } = useAiStatus()
 
   const toggleLang = () => {
     const next = lang === 'he' ? 'en' : 'he'
@@ -18,11 +21,14 @@ export default function Navigation() {
   }
 
   return (
-    <nav className="nav">
-      <Link href="/" className="nav-brand">
-        <span style={{ fontSize: '1.5rem' }}>🤖</span>
-        BenMaorGal
-      </Link>
+    <nav className={`nav ${aiEnabled ? 'ai-active' : ''}`}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <AiToggle />
+        <Link href="/" className="nav-brand">
+          <span style={{ fontSize: '1.5rem' }}>🤖</span>
+          BenMaorGal
+        </Link>
+      </div>
       <button
         className="nav-toggle"
         onClick={() => setMenuOpen(!menuOpen)}

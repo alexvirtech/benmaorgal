@@ -5,11 +5,13 @@ import VoicePrompt from '@/components/voice/VoicePrompt'
 import RobotBubble from '@/components/robot/RobotBubble'
 import ExamplesModal from '@/components/robot/ExamplesModal'
 import { useLang } from '@/i18n'
+import { useAiStatus } from '@/components/layout/AiStatusProvider'
 
 export default function RobotChat({ messages, suggestions, onSend, disabled, templateId }) {
   const messagesEndRef = useRef(null)
   const { t, lang } = useLang()
   const [showExamples, setShowExamples] = useState(false)
+  const { aiEnabled } = useAiStatus()
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -29,16 +31,32 @@ export default function RobotChat({ messages, suggestions, onSend, disabled, tem
       overflow: 'hidden',
       boxShadow: '0 2px 10px rgba(0,0,0,0.06)',
     }}>
-      <div style={{
-        padding: '12px 16px',
-        background: 'linear-gradient(135deg, #6c5ce7, #a29bfe)',
-        color: '#fff',
-        fontWeight: 600,
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px',
-      }}>
+      <div
+        className={`chat-header ${aiEnabled ? 'ai-active' : ''}`}
+        style={{
+          padding: '12px 16px',
+          background: 'linear-gradient(135deg, #6c5ce7, #a29bfe)',
+          color: '#fff',
+          fontWeight: 600,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+        }}
+      >
         <span style={{ fontSize: '1.4rem' }}>🤖</span>
+        {aiEnabled && (
+          <span style={{
+            fontSize: '0.65rem',
+            fontWeight: 700,
+            background: 'rgba(0,206,201,0.3)',
+            border: '1px solid rgba(0,206,201,0.5)',
+            borderRadius: 6,
+            padding: '2px 6px',
+            letterSpacing: '0.5px',
+          }}>
+            ✨ AI
+          </span>
+        )}
         {t('nav.create')}
         {templateId && (
           <button
@@ -87,7 +105,7 @@ export default function RobotChat({ messages, suggestions, onSend, disabled, tem
             flexDirection: msg.role === 'user' ? 'row-reverse' : 'row',
           }}>
             {msg.role === 'robot' ? (
-              <RobotBubble text={msg.textHe || msg.text} />
+              <RobotBubble text={msg.textHe || msg.text} source={msg.source} />
             ) : (
               <>
                 <span style={{ fontSize: '1.5rem', flexShrink: 0 }}>👦</span>

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { aiEnabled, bumpGlobalCount } from '@/ai/state'
+import { aiEnabled, bumpGlobalCount, bumpMonthlyStats, isBudgetExhausted } from '@/ai/state'
 import { callClaude } from '@/ai/claude'
 import { buildSystemPrompt, getResponseTool, summarizeGame } from '@/ai/prompts/system.games'
 import { validateGameDefinition } from '@/game-data/validation'
@@ -76,6 +76,14 @@ export async function POST(request) {
       )
     }
 
+    const budgetDone = await isBudgetExhausted().catch(() => false)
+    if (budgetDone) {
+      return offlineResponse(
+        'הרובוט צריך לנוח עד החודש הבא 😴',
+        'The robot needs to rest until next month 😴'
+      )
+    }
+
     if (deviceId) {
       const deviceCount = bumpDeviceCount(deviceId)
       if (deviceCount > DEVICE_LIMIT) {
@@ -107,6 +115,7 @@ export async function POST(request) {
         hebrewText: promptHe, englishText: prompt, mode,
         tier: 'claude', intent: 'ERROR', latencyMs: 0,
         tokens: null, repaired: false, error: err.code || err.message,
+        model: process.env.ROBOT_MODEL || null,
       })
       if (err.code === 'AI_RATE_LIMIT') {
         return offlineResponse(
@@ -178,7 +187,10 @@ export async function POST(request) {
       tier: 'claude', intent: aiResponse.intent,
       latencyMs: result.latencyMs,
       tokens: result.usage, repaired,
+      model: result.model,
     })
+
+    bumpMonthlyStats({ mode, usage: result.usage, model: result.model }).catch(() => {})
 
     return NextResponse.json({
       intent: aiResponse.intent,

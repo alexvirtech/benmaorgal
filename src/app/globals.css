@@ -175,6 +175,52 @@ button {
   color: white;
 }
 
+.nav.ai-active {
+  position: relative;
+}
+.nav.ai-active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--primary), var(--accent));
+  background-size: 200% 100%;
+  animation: ai-glow 3s ease-in-out infinite;
+}
+@keyframes ai-glow {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav.ai-active::after {
+    animation: none;
+    background: var(--accent);
+  }
+}
+
+.chat-header.ai-active {
+  position: relative;
+}
+.chat-header.ai-active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--primary), var(--accent));
+  background-size: 200% 100%;
+  animation: ai-glow 3s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .chat-header.ai-active::after {
+    animation: none;
+    background: var(--accent);
+  }
+}
+
 .page-container {
   max-width: 1200px;
   margin: 0 auto;

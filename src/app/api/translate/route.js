@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { matchHebrew } from '@/ai/phrasebook.he'
-import { aiEnabled } from '@/ai/state'
+import { aiEnabled, bumpMonthlyStats, isBudgetExhausted } from '@/ai/state'
 import { callClaude } from '@/ai/claude'
 import { TRANSLATE_SYSTEM } from '@/ai/prompts/system.translate'
 
@@ -24,7 +24,8 @@ export async function POST(request) {
     }
 
     try {
-      if (await aiEnabled()) {
+      const budgetDone = await isBudgetExhausted().catch(() => false)
+      if (!budgetDone && await aiEnabled()) {
         const result = await callClaude({
           system: TRANSLATE_SYSTEM,
           messages: [{ role: 'user', content: text }],
@@ -32,6 +33,7 @@ export async function POST(request) {
           model: process.env.TRANSLATE_MODEL || 'claude-haiku-4-5-20251001',
         })
         if (result.text?.trim()) {
+          bumpMonthlyStats({ mode: 'translate', usage: result.usage, model: result.model }).catch(() => {})
           return respond(result.text.trim(), 'claude')
         }
       }

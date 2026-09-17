@@ -27,7 +27,7 @@ export default function HomePage() {
       } else {
         msgs.push({ id: 1, role: 'user', text: english, lang: 'en', timestamp: Date.now() })
       }
-      msgs.push({ id: 2, role: 'robot', text: result.robotMessage, textHe: result.robotMessageHe || result.robotMessage, timestamp: Date.now() })
+      msgs.push({ id: 2, role: 'robot', text: result.robotMessage, textHe: result.robotMessageHe || result.robotMessage, source: result.source || null, timestamp: Date.now() })
       const game = createGame(result.definition, msgs)
       router.push(`/games/${game.id}`)
     } else {

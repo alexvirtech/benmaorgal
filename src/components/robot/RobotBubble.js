@@ -1,6 +1,8 @@
 'use client'
 
-export default function RobotBubble({ text }) {
+export default function RobotBubble({ text, source }) {
+  const isAiSource = source === 'claude'
+
   return (
     <div style={{
       display: 'flex',
@@ -20,8 +22,20 @@ export default function RobotBubble({ text }) {
         color: '#2d3436',
         borderBottomRightRadius: '14px',
         borderBottomLeftRadius: '4px',
+        position: 'relative',
       }}>
         {text}
+        {isAiSource && (
+          <span style={{
+            display: 'inline-block',
+            marginInlineStart: 6,
+            fontSize: '0.7rem',
+            opacity: 0.5,
+            verticalAlign: 'middle',
+          }}>
+            🤖✨
+          </span>
+        )}
       </div>
     </div>
   )

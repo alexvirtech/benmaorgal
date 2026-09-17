@@ -1,4 +1,5 @@
 import './globals.css'
+import { AiStatusProvider } from '@/components/layout/AiStatusProvider'
 
 export const metadata = {
   title: 'BenMaorGal - Build Your Own Game!',
@@ -14,7 +15,9 @@ export default function RootLayout({ children }) {
             __html: `try{var l=localStorage.getItem('benmaorgal-lang')||'he';document.documentElement.lang=l;document.documentElement.dir=l==='he'?'rtl':'ltr'}catch(e){}`,
           }}
         />
-        {children}
+        <AiStatusProvider>
+          {children}
+        </AiStatusProvider>
       </body>
     </html>
   )

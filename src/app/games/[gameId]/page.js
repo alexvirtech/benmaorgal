@@ -182,6 +182,7 @@ export default function GameWorkspacePage() {
       role: 'robot',
       text: result.robotMessage,
       textHe: result.robotMessageHe || result.robotMessage,
+      source: result.source || null,
       timestamp: Date.now(),
     }
     newMessages.push(robotMsg)
