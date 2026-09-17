@@ -198,6 +198,48 @@ export const MODIFICATION_PATTERNS = [
     descriptionHe: (m) => `ניקוד יעד: ${m[1]}! 🎯`,
   },
   {
+    match: /add\s+(\d+)\s+lives?/i,
+    action: (m) => ({ type: 'SET_PROPERTY', path: 'rules.startingLives', value: parseInt(m[1]) }),
+    description: (m) => `You now have ${m[1]} lives! ❤️`,
+    descriptionHe: (m) => `יש לך ${m[1]} חיים! ❤️`,
+  },
+  {
+    match: /add\s+(?:some\s+|more\s+)?(?:coins?|gold)/i,
+    action: () => ({
+      type: 'ADD_OBJECT',
+      object: { role: 'collectible', type: 'coin', speed: 2, spawnRate: 1500, points: 1, effect: 'addScore' },
+    }),
+    description: 'Added coins! 🪙',
+    descriptionHe: 'הוספתי מטבעות! 🪙',
+  },
+  {
+    match: /add\s+(?:some\s+|more\s+)?stars?/i,
+    action: () => ({
+      type: 'ADD_OBJECT',
+      object: { role: 'collectible', type: 'star', speed: 2, spawnRate: 1500, points: 1, effect: 'addScore' },
+    }),
+    description: 'Added stars! ⭐',
+    descriptionHe: 'הוספתי כוכבים! ⭐',
+  },
+  {
+    match: /add\s+(?:some\s+|more\s+)?(?:gems?|diamonds?)/i,
+    action: () => ({
+      type: 'ADD_OBJECT',
+      object: { role: 'collectible', type: 'gem', speed: 2, spawnRate: 1500, points: 2, effect: 'addScore' },
+    }),
+    description: 'Added gems! 💎',
+    descriptionHe: 'הוספתי יהלומים! 💎',
+  },
+  {
+    match: /add\s+(?:some\s+|more\s+)?hearts?/i,
+    action: () => ({
+      type: 'ADD_OBJECT',
+      object: { role: 'collectible', type: 'heart', speed: 2, spawnRate: 2000, points: 0, effect: 'addLife' },
+    }),
+    description: 'Added hearts! ❤️',
+    descriptionHe: 'הוספתי לבבות! ❤️',
+  },
+  {
     match: /(?:make|set)\s+(?:it\s+)?(?:the\s+\w+\s+)?bigger/i,
     action: () => ({ type: 'SET_PROPERTY', path: 'player.size', value: null, delta: 15 }),
     description: 'Made the player bigger! 🔍',

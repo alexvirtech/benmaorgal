@@ -222,6 +222,23 @@ const MODIFICATION_PATTERNS = [
       }
     },
   },
+  // Add collectibles (coins, stars, gems, etc.)
+  {
+    match: /תוסיף\s+(?:לי\s+)?(.+)/,
+    handler(m) {
+      const raw = m[1].trim()
+      for (const [heb, obj] of Object.entries(COLLECTIBLES_HE)) {
+        if (raw.includes(heb)) {
+          return {
+            english: `add ${obj.type}s`,
+            action: { type: 'ADD_OBJECT', object: { role: 'collectible', type: obj.type, speed: 2, spawnRate: 1500, points: 1, effect: 'addScore' } },
+            responseHe: `הוספתי ${heb}! ${obj.sprite}`,
+          }
+        }
+      }
+      return null
+    },
+  },
 ]
 
 const CREATION_PATTERNS = [

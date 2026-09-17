@@ -2,18 +2,12 @@
 
 import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react'
 
-const AiStatusContext = createContext({
-  aiEnabled: false,
-  budgetExhausted: false,
-  toggleAi: () => {},
-  refreshStatus: () => {},
-})
+const AiStatusContext = createContext({ aiEnabled: false, budgetExhausted: false })
 
 const POLL_INTERVAL = 60_000
 
 export function AiStatusProvider({ children }) {
   const [status, setStatus] = useState({ aiEnabled: false, budgetExhausted: false })
-  const [toggling, setToggling] = useState(false)
   const channelRef = useRef(null)
 
   const fetchStatus = useCallback(async () => {
@@ -33,28 +27,6 @@ export function AiStatusProvider({ children }) {
       // keep current state on error
     }
   }, [])
-
-  const toggleAi = useCallback(async () => {
-    if (toggling) return
-    setToggling(true)
-    try {
-      const res = await fetch('/api/ai-status', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ enabled: !status.aiEnabled }),
-      })
-      if (res.ok) {
-        const data = await res.json()
-        const next = { aiEnabled: data.enabled, budgetExhausted: data.budgetExhausted }
-        setStatus(next)
-        window.dispatchEvent(new CustomEvent('ai-status-changed', { detail: next }))
-        try {
-          new BroadcastChannel('benmaorgal-ai').postMessage({ enabled: data.enabled })
-        } catch {}
-      }
-    } catch {}
-    setToggling(false)
-  }, [toggling, status.aiEnabled])
 
   useEffect(() => {
     fetchStatus()
@@ -85,10 +57,8 @@ export function AiStatusProvider({ children }) {
     }
   }, [fetchStatus])
 
-  const value = { ...status, toggleAi, refreshStatus: fetchStatus }
-
   return (
-    <AiStatusContext.Provider value={value}>
+    <AiStatusContext.Provider value={status}>
       {children}
     </AiStatusContext.Provider>
   )
