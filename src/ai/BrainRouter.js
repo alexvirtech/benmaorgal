@@ -26,6 +26,11 @@ if (typeof window !== 'undefined') {
   window.addEventListener('focus', () => {
     aiStatusCache.at = 0
   })
+  window.addEventListener('ai-status-changed', (e) => {
+    if (e.detail) {
+      aiStatusCache = { enabled: e.detail.aiEnabled, at: Date.now() }
+    }
+  })
 }
 
 export async function routePrompt(prompt, currentGame = null, mode = 'modify') {
@@ -40,6 +45,16 @@ export async function routePrompt(prompt, currentGame = null, mode = 'modify') {
   }
 
   const text = prompt.trim()
+
+  if (text.length > 300) {
+    return {
+      intent: 'UNKNOWN',
+      robotMessage: 'That message is too long! Try something shorter. 🤖',
+      robotMessageHe: 'ההודעה ארוכה מדי! נסה משהו קצר יותר 🤖',
+      suggestions: [],
+      source: 'rejected',
+    }
+  }
 
   const hebrewMatch = matchHebrew(text)
   if (hebrewMatch) {
@@ -57,14 +72,22 @@ export async function routePrompt(prompt, currentGame = null, mode = 'modify') {
         }
       }
     }
-    if (hebrewMatch.english) {
-      const localResult = interpretPrompt(hebrewMatch.english, currentGame)
-      if (localResult.intent !== 'UNKNOWN') {
-        return {
-          ...localResult,
-          robotMessageHe: hebrewMatch.responseHe || localResult.robotMessageHe || 'בוצע! ✨',
-          source: 'phrasebook+local',
-        }
+  }
+
+  const aiOn = await checkAiEnabled()
+
+  if (aiOn) {
+    const aiResult = await interpretPromptAI(text, currentGame)
+    return { ...aiResult, source: aiResult.source || 'claude' }
+  }
+
+  if (hebrewMatch?.english) {
+    const localResult = interpretPrompt(hebrewMatch.english, currentGame)
+    if (localResult.intent !== 'UNKNOWN') {
+      return {
+        ...localResult,
+        robotMessageHe: hebrewMatch.responseHe || localResult.robotMessageHe || 'בוצע! ✨',
+        source: 'phrasebook+local',
       }
     }
   }
@@ -78,27 +101,11 @@ export async function routePrompt(prompt, currentGame = null, mode = 'modify') {
     }
   }
 
-  if (text.length > 300) {
-    return {
-      intent: 'UNKNOWN',
-      robotMessage: 'That message is too long! Try something shorter. 🤖',
-      robotMessageHe: 'ההודעה ארוכה מדי! נסה משהו קצר יותר 🤖',
-      suggestions: [],
-      source: 'rejected',
-    }
+  return {
+    intent: 'UNKNOWN',
+    robotMessage: 'I cannot connect right now, but you can try simple commands',
+    robotMessageHe: 'אני לא מצליח להתחבר עכשיו, אבל אפשר לנסות פקודות פשוטות',
+    suggestions: [],
+    source: 'offline',
   }
-
-  const aiOn = await checkAiEnabled()
-  if (!aiOn) {
-    return {
-      intent: 'UNKNOWN',
-      robotMessage: localResult.robotMessage,
-      robotMessageHe: 'אני לא מצליח להתחבר עכשיו, אבל אפשר לנסות פקודות פשוטות',
-      suggestions: [],
-      source: 'offline',
-    }
-  }
-
-  const aiResult = await interpretPromptAI(text, currentGame)
-  return { ...aiResult, source: aiResult.source || 'claude' }
 }
