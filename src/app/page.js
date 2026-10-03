@@ -136,6 +136,9 @@ export default function HomePage() {
             >
               🎮 {t('home.myGames')}
             </button>
+            <a href="/stars" className="btn btn-primary btn-lg">
+              {t('home.openStars')}
+            </a>
           </div>
 
           <div style={{ marginTop: '48px', paddingTop: '24px', borderTop: '1px solid #eee' }}>

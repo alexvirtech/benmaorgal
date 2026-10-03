@@ -14,6 +14,8 @@ export default {
   'home.myGames': '🎮 המשחקים שלי',
   'home.battleHint': 'כבר משתמשים ב-Ben\'s Brawl Apps?',
   'home.openBattle': '⚔️ פתח משחקי קרב',
+  'home.starsHint': 'חדש! קרב זירה של 8 לוחמים:',
+  'home.openStars': '⭐ שחקו ב-Starfall Arena',
 
   'chat.header': 'רובוט המשחקים',
   'chat.placeholder': 'מה לשנות במשחק?',

@@ -14,6 +14,8 @@ export default {
   'home.myGames': '🎮 My Games',
   'home.battleHint': 'Already using Ben\'s Brawl Apps?',
   'home.openBattle': '⚔️ Open Battle Apps',
+  'home.starsHint': 'New! An 8-fighter arena battle:',
+  'home.openStars': '⭐ Play Starfall Arena',
 
   'chat.header': 'Game Robot',
   'chat.placeholder': 'Tell me what to change...',
